@@ -1,0 +1,5 @@
+ros2 topic pub /motor_stop std_msgs/Bool "data: true" --once
+ros2 topic pub /motor_start std_msgs/Bool "data: true" --once
+ros2 topic pub /loadcell_reset
+
+나중에는 속도 바꿔야 함?

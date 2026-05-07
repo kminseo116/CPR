@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# ROS2 / colcon
+build/
+install/
+log/
+
+# VS Code
+.vscode/
+
+# Environment
+.env
+.venv/
+venv/
+
+# Logs / data
+*.log
+*.bag
+*.db3
+
+# System
+.DS_Store

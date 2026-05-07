@@ -1,0 +1,448 @@
+========== 왕복 10/1000 ==========
+
+[RECIP 10] BACKWARD 시작
+[CPR 00:51] BACKWARD | target=68421 | pos=113230 | error=44809 | current=18.200A | speed=100rpm | MOVING
+[WARN] [1778074568.412024778] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778074568.507643050] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[CPR 00:51] BACKWARD | target=68421 | pos=111051 | error=42630 | current=10.100A | speed=100rpm | MOVING
+[CPR 00:51] BACKWARD | target=68421 | pos=107334 | error=38913 | current=8.700A | speed=100rpm | MOVING
+[INFO] [1778074568.922827271] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778074569.019806680] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 00:52] BACKWARD | target=68421 | pos=102518 | error=34097 | current=5.700A | speed=100rpm | MOVING
+[CPR 00:52] BACKWARD | target=68421 | pos=98800 | error=30379 | current=2.000A | speed=100rpm | MOVING
+[CPR 00:52] BACKWARD | target=68421 | pos=95083 | error=26662 | current=1.600A | speed=100rpm | MOVING
+[CPR 00:52] BACKWARD | target=68421 | pos=90282 | error=21861 | current=1.400A | speed=100rpm | MOVING
+[CPR 00:52] BACKWARD | target=68421 | pos=86549 | error=18128 | current=1.400A | speed=100rpm | MOVING
+[CPR 00:53] BACKWARD | target=68421 | pos=81499 | error=13078 | current=3.600A | speed=100rpm | MOVING
+[CPR 00:53] BACKWARD | target=68421 | pos=78032 | error=9611 | current=2.300A | speed=100rpm | MOVING
+[CPR 00:53] BACKWARD | target=68421 | pos=74317 | error=5896 | current=1.600A | speed=100rpm | MOVING
+[CPR 00:54] BACKWARD | target=68421 | pos=69640 | error=1219 | current=5.500A | speed=100rpm | MOVING
+[CPR 00:54] BACKWARD | target=68421 | pos=68634 | error=213 | current=4.200A | speed=100rpm | REACHED
+
+[RECIP 10] FORWARD 시작
+[CPR 00:54] FORWARD | target=113421 | pos=68614 | error=44807 | current=11.000A | speed=100rpm | MOVING
+[CPR 00:54] FORWARD | target=113421 | pos=72394 | error=41027 | current=15.100A | speed=100rpm | MOVING
+[CPR 00:54] FORWARD | target=113421 | pos=75859 | error=37562 | current=18.200A | speed=100rpm | MOVING
+[CPR 00:55] FORWARD | target=113421 | pos=79576 | error=33845 | current=17.600A | speed=100rpm | MOVING
+[CPR 00:55] FORWARD | target=113421 | pos=84376 | error=29045 | current=16.800A | speed=100rpm | MOVING
+[CPR 00:55] FORWARD | target=113421 | pos=88112 | error=25309 | current=19.500A | speed=100rpm | MOVING
+[CPR 00:55] FORWARD | target=113421 | pos=91827 | error=21594 | current=21.000A | speed=100rpm | MOVING
+[CPR 00:56] FORWARD | target=113421 | pos=96627 | error=16794 | current=23.100A | speed=100rpm | MOVING
+[CPR 00:56] FORWARD | target=113421 | pos=100095 | error=13326 | current=27.200A | speed=100rpm | MOVING
+[CPR 00:56] FORWARD | target=113421 | pos=104078 | error=9343 | current=31.800A | speed=100rpm | MOVING
+[CPR 00:56] FORWARD | target=113421 | pos=107546 | error=5875 | current=34.200A | speed=100rpm | MOVING
+[CPR 00:56] FORWARD | target=113421 | pos=110747 | error=2674 | current=34.800A | speed=100rpm | MOVING
+[WARN] [1778074574.116305428] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[CPR 00:57] FORWARD | target=113421 | pos=113349 | error=72 | current=35.200A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=10 | bpm=10.0
+
+========== 왕복 11/1000 ==========
+[WARN] [1778074574.227851805] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+[RECIP 11] BACKWARD 시작
+[CPR 00:57] BACKWARD | target=68421 | pos=113224 | error=44803 | current=17.600A | speed=100rpm | MOVING
+[INFO] [1778074574.625968067] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[CPR 00:57] BACKWARD | target=68421 | pos=109187 | error=40766 | current=9.800A | speed=100rpm | MOVING
+[INFO] [1778074574.739086116] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 00:57] BACKWARD | target=68421 | pos=105456 | error=37035 | current=8.200A | speed=100rpm | MOVING
+[CPR 00:58] BACKWARD | target=68421 | pos=100402 | error=31981 | current=3.200A | speed=100rpm | MOVING
+[CPR 00:58] BACKWARD | target=68421 | pos=97201 | error=28780 | current=1.900A | speed=100rpm | MOVING
+[CPR 00:58] BACKWARD | target=68421 | pos=93487 | error=25066 | current=1.700A | speed=100rpm | MOVING
+[CPR 00:58] BACKWARD | target=68421 | pos=88685 | error=20264 | current=1.600A | speed=100rpm | MOVING
+[CPR 00:59] BACKWARD | target=68421 | pos=84951 | error=16530 | current=2.800A | speed=100rpm | MOVING
+[CPR 00:59] BACKWARD | target=68421 | pos=81232 | error=12811 | current=3.100A | speed=100rpm | MOVING
+[CPR 00:59] BACKWARD | target=68421 | pos=77765 | error=9344 | current=2.000A | speed=100rpm | MOVING
+[CPR 00:59] BACKWARD | target=68421 | pos=74300 | error=5879 | current=1.600A | speed=100rpm | MOVING
+[CPR 00:59] BACKWARD | target=68421 | pos=70566 | error=2145 | current=4.200A | speed=100rpm | MOVING
+[CPR 01:00] BACKWARD | target=68421 | pos=68500 | error=79 | current=4.100A | speed=100rpm | REACHED
+
+[RECIP 11] FORWARD 시작
+[CPR 01:00] FORWARD | target=113421 | pos=68613 | error=44808 | current=11.500A | speed=100rpm | MOVING
+[CPR 01:00] FORWARD | target=113421 | pos=71323 | error=42098 | current=14.200A | speed=100rpm | MOVING
+[CPR 01:00] FORWARD | target=113421 | pos=76376 | error=37045 | current=19.000A | speed=100rpm | MOVING
+[CPR 01:01] FORWARD | target=113421 | pos=79844 | error=33577 | current=17.200A | speed=100rpm | MOVING
+[CPR 01:01] FORWARD | target=113421 | pos=84892 | error=28529 | current=17.000A | speed=100rpm | MOVING
+[CPR 01:01] FORWARD | target=113421 | pos=88091 | error=25330 | current=19.400A | speed=100rpm | MOVING
+[CPR 01:01] FORWARD | target=113421 | pos=91824 | error=21597 | current=21.200A | speed=100rpm | MOVING
+[CPR 01:02] FORWARD | target=113421 | pos=96879 | error=16542 | current=22.600A | speed=100rpm | MOVING
+[CPR 01:02] FORWARD | target=113421 | pos=100345 | error=13076 | current=27.100A | speed=100rpm | MOVING
+[CPR 01:02] FORWARD | target=113421 | pos=104059 | error=9362 | current=31.100A | speed=100rpm | MOVING
+[CPR 01:02] FORWARD | target=113421 | pos=108860 | error=4561 | current=33.300A | speed=100rpm | MOVING
+[CPR 01:03] FORWARD | target=113421 | pos=112200 | error=1221 | current=38.700A | speed=100rpm | MOVING
+[CPR 01:03] FORWARD | target=113421 | pos=113208 | error=213 | current=36.500A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=11 | bpm=10.0
+
+========== 왕복 12/1000 ==========
+
+[RECIP 12] BACKWARD 시작
+[WARN] [1778074580.315081689] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[CPR 01:03] BACKWARD | target=68421 | pos=113228 | error=44807 | current=17.700A | speed=100rpm | MOVING
+[WARN] [1778074580.410341702] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[CPR 01:03] BACKWARD | target=68421 | pos=111050 | error=42629 | current=10.300A | speed=100rpm | MOVING
+[INFO] [1778074580.809106644] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[CPR 01:03] BACKWARD | target=68421 | pos=106001 | error=37580 | current=6.700A | speed=100rpm | MOVING
+[INFO] [1778074580.905232672] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 01:04] BACKWARD | target=68421 | pos=101202 | error=32781 | current=5.100A | speed=100rpm | MOVING
+[CPR 01:04] BACKWARD | target=68421 | pos=97485 | error=29064 | current=1.100A | speed=100rpm | MOVING
+[CPR 01:04] BACKWARD | target=68421 | pos=92680 | error=24259 | current=1.800A | speed=100rpm | MOVING
+[CPR 01:04] BACKWARD | target=68421 | pos=89214 | error=20793 | current=1.200A | speed=100rpm | MOVING
+[CPR 01:05] BACKWARD | target=68421 | pos=85500 | error=17079 | current=3.300A | speed=100rpm | MOVING
+[CPR 01:05] BACKWARD | target=68421 | pos=80697 | error=12276 | current=3.000A | speed=100rpm | MOVING
+[CPR 01:05] BACKWARD | target=68421 | pos=76981 | error=8560 | current=1.500A | speed=100rpm | MOVING
+[CPR 01:05] BACKWARD | target=68421 | pos=72182 | error=3761 | current=3.700A | speed=100rpm | MOVING
+[CPR 01:06] BACKWARD | target=68421 | pos=68962 | error=541 | current=4.000A | speed=100rpm | MOVING
+[CPR 01:06] BACKWARD | target=68421 | pos=68432 | error=11 | current=4.200A | speed=100rpm | REACHED
+
+[RECIP 12] FORWARD 시작
+[CPR 01:06] FORWARD | target=113421 | pos=68613 | error=44808 | current=10.400A | speed=100rpm | MOVING
+[CPR 01:06] FORWARD | target=113421 | pos=70788 | error=42633 | current=14.200A | speed=100rpm | MOVING
+[CPR 01:06] FORWARD | target=113421 | pos=74522 | error=38899 | current=18.000A | speed=100rpm | MOVING
+[CPR 01:07] FORWARD | target=113421 | pos=79572 | error=33849 | current=17.900A | speed=100rpm | MOVING
+[CPR 01:07] FORWARD | target=113421 | pos=83042 | error=30379 | current=16.100A | speed=100rpm | MOVING
+[CPR 01:07] FORWARD | target=113421 | pos=86757 | error=26664 | current=18.800A | speed=100rpm | MOVING
+[CPR 01:07] FORWARD | target=113421 | pos=91556 | error=21865 | current=20.700A | speed=100rpm | MOVING
+[CPR 01:08] FORWARD | target=113421 | pos=95275 | error=18146 | current=20.500A | speed=100rpm | MOVING
+[CPR 01:08] FORWARD | target=113421 | pos=100072 | error=13349 | current=26.300A | speed=100rpm | MOVING
+[CPR 01:08] FORWARD | target=113421 | pos=103543 | error=9878 | current=32.200A | speed=100rpm | MOVING
+[CPR 01:08] FORWARD | target=113421 | pos=107261 | error=6160 | current=32.600A | speed=100rpm | MOVING
+[CPR 01:09] FORWARD | target=113421 | pos=111993 | error=1428 | current=35.800A | speed=100rpm | MOVING
+[CPR 01:09] FORWARD | target=113421 | pos=113113 | error=308 | current=38.600A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=12 | bpm=10.0
+
+========== 왕복 13/1000 ==========
+
+[RECIP 13] BACKWARD 시작
+[CPR 01:09] BACKWARD | target=68421 | pos=113234 | error=44813 | current=18.900A | speed=100rpm | MOVING
+[WARN] [1778074586.415791386] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778074586.511819472] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[CPR 01:09] BACKWARD | target=68421 | pos=109472 | error=41051 | current=7.800A | speed=100rpm | MOVING
+[CPR 01:09] BACKWARD | target=68421 | pos=106001 | error=37580 | current=7.400A | speed=100rpm | MOVING
+[INFO] [1778074586.927300386] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778074587.023014572] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 01:10] BACKWARD | target=68421 | pos=100951 | error=32530 | current=5.500A | speed=100rpm | MOVING
+[CPR 01:10] BACKWARD | target=68421 | pos=97485 | error=29064 | current=1.800A | speed=100rpm | MOVING
+[CPR 01:10] BACKWARD | target=68421 | pos=93768 | error=25347 | current=1.200A | speed=100rpm | MOVING
+[CPR 01:10] BACKWARD | target=68421 | pos=88967 | error=20546 | current=1.300A | speed=100rpm | MOVING
+[CPR 01:11] BACKWARD | target=68421 | pos=85504 | error=17083 | current=3.500A | speed=100rpm | MOVING
+[CPR 01:11] BACKWARD | target=68421 | pos=81783 | error=13362 | current=3.100A | speed=100rpm | MOVING
+[CPR 01:11] BACKWARD | target=68421 | pos=76980 | error=8559 | current=1.500A | speed=100rpm | MOVING
+[CPR 01:11] BACKWARD | target=68421 | pos=73268 | error=4847 | current=3.100A | speed=100rpm | MOVING
+[CPR 01:12] BACKWARD | target=68421 | pos=68973 | error=552 | current=3.400A | speed=100rpm | MOVING
+[CPR 01:12] BACKWARD | target=68421 | pos=68432 | error=11 | current=4.000A | speed=100rpm | REACHED
+
+[RECIP 13] FORWARD 시작
+[CPR 01:12] FORWARD | target=113421 | pos=68613 | error=44808 | current=11.100A | speed=100rpm | MOVING
+[CPR 01:12] FORWARD | target=113421 | pos=72393 | error=41028 | current=14.700A | speed=100rpm | MOVING
+[CPR 01:12] FORWARD | target=113421 | pos=75858 | error=37563 | current=17.800A | speed=100rpm | MOVING
+[CPR 01:13] FORWARD | target=113421 | pos=80926 | error=32495 | current=17.000A | speed=100rpm | MOVING
+[CPR 01:13] FORWARD | target=113421 | pos=84376 | error=29045 | current=17.500A | speed=100rpm | MOVING
+[CPR 01:13] FORWARD | target=113421 | pos=88108 | error=25313 | current=19.100A | speed=100rpm | MOVING
+[CPR 01:13] FORWARD | target=113421 | pos=93178 | error=20243 | current=20.300A | speed=100rpm | MOVING
+[CPR 01:14] FORWARD | target=113421 | pos=96894 | error=16527 | current=22.600A | speed=100rpm | MOVING
+[CPR 01:14] FORWARD | target=113421 | pos=100607 | error=12814 | current=27.500A | speed=100rpm | MOVING
+[CPR 01:14] FORWARD | target=113421 | pos=105410 | error=8011 | current=32.000A | speed=100rpm | MOVING
+[CPR 01:14] FORWARD | target=113421 | pos=109144 | error=4277 | current=33.700A | speed=100rpm | MOVING
+[WARN] [1778074592.087517098] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[CPR 01:15] FORWARD | target=113421 | pos=112575 | error=846 | current=36.000A | speed=100rpm | MOVING
+[WARN] [1778074592.183324389] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[CPR 01:15] FORWARD | target=113421 | pos=113285 | error=136 | current=36.000A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=13 | bpm=9.9
+
+========== 왕복 14/1000 ==========
+
+[RECIP 14] BACKWARD 시작
+[CPR 01:15] BACKWARD | target=68421 | pos=113228 | error=44807 | current=17.700A | speed=100rpm | MOVING
+[CPR 01:15] BACKWARD | target=68421 | pos=110534 | error=42113 | current=9.300A | speed=100rpm | MOVING
+[INFO] [1778074592.678284866] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 01:15] BACKWARD | target=68421 | pos=105733 | error=37312 | current=7.600A | speed=100rpm | MOVING
+[INFO] [1778074593.077342430] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[CPR 01:16] BACKWARD | target=68421 | pos=102268 | error=33847 | current=5.300A | speed=100rpm | MOVING
+[CPR 01:16] BACKWARD | target=68421 | pos=97214 | error=28793 | current=1.300A | speed=100rpm | MOVING
+[CPR 01:16] BACKWARD | target=68421 | pos=94013 | error=25592 | current=1.500A | speed=100rpm | MOVING
+[CPR 01:16] BACKWARD | target=68421 | pos=90299 | error=21878 | current=1.400A | speed=100rpm | MOVING
+[CPR 01:17] BACKWARD | target=68421 | pos=85500 | error=17079 | current=3.200A | speed=100rpm | MOVING
+[CPR 01:17] BACKWARD | target=68421 | pos=82031 | error=13610 | current=3.800A | speed=100rpm | MOVING
+[CPR 01:17] BACKWARD | target=68421 | pos=76981 | error=8560 | current=1.400A | speed=100rpm | MOVING
+[CPR 01:17] BACKWARD | target=68421 | pos=73779 | error=5358 | current=4.000A | speed=100rpm | MOVING
+[CPR 01:18] BACKWARD | target=68421 | pos=70089 | error=1668 | current=4.300A | speed=100rpm | MOVING
+[CPR 01:18] BACKWARD | target=68421 | pos=68458 | error=37 | current=4.300A | speed=100rpm | REACHED
+
+[RECIP 14] FORWARD 시작
+[CPR 01:18] FORWARD | target=113421 | pos=68614 | error=44807 | current=11.900A | speed=100rpm | MOVING
+[CPR 01:18] FORWARD | target=113421 | pos=71307 | error=42114 | current=13.400A | speed=100rpm | MOVING
+[CPR 01:18] FORWARD | target=113421 | pos=76105 | error=37316 | current=18.000A | speed=100rpm | MOVING
+[CPR 01:19] FORWARD | target=113421 | pos=79576 | error=33845 | current=18.300A | speed=100rpm | MOVING
+[CPR 01:19] FORWARD | target=113421 | pos=83293 | error=30128 | current=15.700A | speed=100rpm | MOVING
+[CPR 01:19] FORWARD | target=113421 | pos=88091 | error=25330 | current=19.000A | speed=100rpm | MOVING
+[CPR 01:19] FORWARD | target=113421 | pos=91809 | error=21612 | current=20.300A | speed=100rpm | MOVING
+[CPR 01:20] FORWARD | target=113421 | pos=96606 | error=16815 | current=22.300A | speed=100rpm | MOVING
+[CPR 01:20] FORWARD | target=113421 | pos=100075 | error=13346 | current=27.200A | speed=100rpm | MOVING
+[CPR 01:20] FORWARD | target=113421 | pos=105129 | error=8292 | current=30.500A | speed=100rpm | MOVING
+[CPR 01:20] FORWARD | target=113421 | pos=108328 | error=5093 | current=36.800A | speed=100rpm | MOVING
+[CPR 01:21] FORWARD | target=113421 | pos=111979 | error=1442 | current=35.700A | speed=100rpm | MOVING
+[WARN] [1778074598.141611009] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[CPR 01:21] FORWARD | target=113421 | pos=112995 | error=426 | current=39.900A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=14 | bpm=10.1
+
+========== 왕복 15/1000 ==========
+[WARN] [1778074598.222818953] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+[RECIP 15] BACKWARD 시작
+[CPR 01:21] BACKWARD | target=68421 | pos=113268 | error=44847 | current=18.500A | speed=100rpm | MOVING
+[CPR 01:21] BACKWARD | target=68421 | pos=111186 | error=42765 | current=10.100A | speed=100rpm | MOVING
+[INFO] [1778074598.620773876] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778074598.732466956] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 01:21] BACKWARD | target=68421 | pos=107465 | error=39044 | current=7.800A | speed=100rpm | MOVING
+[CPR 01:22] BACKWARD | target=68421 | pos=102665 | error=34244 | current=5.900A | speed=100rpm | MOVING
+[CPR 01:22] BACKWARD | target=68421 | pos=98948 | error=30527 | current=2.500A | speed=100rpm | MOVING
+[CPR 01:22] BACKWARD | target=68421 | pos=94148 | error=25727 | current=1.300A | speed=100rpm | MOVING
+[CPR 01:22] BACKWARD | target=68421 | pos=90949 | error=22528 | current=1.200A | speed=100rpm | MOVING
+[CPR 01:22] BACKWARD | target=68421 | pos=87231 | error=18810 | current=1.400A | speed=100rpm | MOVING
+[CPR 01:23] BACKWARD | target=68421 | pos=82430 | error=14009 | current=3.500A | speed=100rpm | MOVING
+[CPR 01:23] BACKWARD | target=68421 | pos=78713 | error=10292 | current=2.200A | speed=100rpm | MOVING
+[CPR 01:23] BACKWARD | target=68421 | pos=73914 | error=5493 | current=2.500A | speed=100rpm | MOVING
+[CPR 01:23] BACKWARD | target=68421 | pos=70714 | error=2293 | current=5.000A | speed=100rpm | MOVING
+[CPR 01:24] BACKWARD | target=68421 | pos=68476 | error=55 | current=4.800A | speed=100rpm | REACHED
+
+[RECIP 15] FORWARD 시작
+[CPR 01:24] FORWARD | target=113421 | pos=68607 | error=44814 | current=10.500A | speed=100rpm | MOVING
+[CPR 01:24] FORWARD | target=113421 | pos=70771 | error=42650 | current=13.700A | speed=100rpm | MOVING
+[CPR 01:24] FORWARD | target=113421 | pos=74505 | error=38916 | current=17.900A | speed=100rpm | MOVING
+[CPR 01:25] FORWARD | target=113421 | pos=79555 | error=33866 | current=17.300A | speed=100rpm | MOVING
+[CPR 01:25] FORWARD | target=113421 | pos=82754 | error=30667 | current=16.300A | speed=100rpm | MOVING
+[CPR 01:25] FORWARD | target=113421 | pos=86488 | error=26933 | current=17.900A | speed=100rpm | MOVING
+[CPR 01:25] FORWARD | target=113421 | pos=90208 | error=23213 | current=20.200A | speed=100rpm | MOVING
+[CPR 01:25] FORWARD | target=113421 | pos=93409 | error=20012 | current=20.600A | speed=100rpm | MOVING
+[CPR 01:26] FORWARD | target=113421 | pos=97124 | error=16297 | current=21.700A | speed=100rpm | MOVING
+[CPR 01:26] FORWARD | target=113421 | pos=101925 | error=11496 | current=27.500A | speed=100rpm | MOVING
+[CPR 01:26] FORWARD | target=113421 | pos=105124 | error=8297 | current=34.900A | speed=100rpm | MOVING
+[CPR 01:26] FORWARD | target=113421 | pos=108858 | error=4563 | current=33.400A | speed=100rpm | MOVING
+[CPR 01:27] FORWARD | target=113421 | pos=113107 | error=314 | current=37.400A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=15 | bpm=10.0
+
+========== 왕복 16/1000 ==========
+[WARN] [1778074604.213538084] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+
+[RECIP 16] BACKWARD 시작
+[WARN] [1778074604.308723046] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[CPR 01:27] BACKWARD | target=68421 | pos=113229 | error=44808 | current=18.200A | speed=100rpm | MOVING
+[CPR 01:27] BACKWARD | target=68421 | pos=110537 | error=42116 | current=9.100A | speed=100rpm | MOVING
+[INFO] [1778074604.723220009] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778074604.818938749] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 01:27] BACKWARD | target=68421 | pos=105738 | error=37317 | current=6.200A | speed=100rpm | MOVING
+[CPR 01:28] BACKWARD | target=68421 | pos=102272 | error=33851 | current=5.300A | speed=100rpm | MOVING
+[CPR 01:28] BACKWARD | target=68421 | pos=97218 | error=28797 | current=1.300A | speed=100rpm | MOVING
+[CPR 01:28] BACKWARD | target=68421 | pos=94018 | error=25597 | current=1.700A | speed=100rpm | MOVING
+[CPR 01:28] BACKWARD | target=68421 | pos=88968 | error=20547 | current=1.500A | speed=100rpm | MOVING
+[CPR 01:29] BACKWARD | target=68421 | pos=84169 | error=15748 | current=4.300A | speed=100rpm | MOVING
+[CPR 01:29] BACKWARD | target=68421 | pos=80453 | error=12032 | current=2.600A | speed=100rpm | MOVING
+[CPR 01:29] BACKWARD | target=68421 | pos=75648 | error=7227 | current=2.900A | speed=100rpm | MOVING
+[CPR 01:29] BACKWARD | target=68421 | pos=72182 | error=3761 | current=4.100A | speed=100rpm | MOVING
+[CPR 01:30] BACKWARD | target=68421 | pos=68503 | error=82 | current=4.100A | speed=100rpm | REACHED
+
+[RECIP 16] FORWARD 시작
+[CPR 01:30] FORWARD | target=113421 | pos=68703 | error=44718 | current=11.300A | speed=100rpm | MOVING
+[CPR 01:30] FORWARD | target=113421 | pos=71588 | error=41833 | current=14.200A | speed=100rpm | MOVING
+[CPR 01:30] FORWARD | target=113421 | pos=76641 | error=36780 | current=19.000A | speed=100rpm | MOVING
+[CPR 01:31] FORWARD | target=113421 | pos=80108 | error=33313 | current=18.000A | speed=100rpm | MOVING
+[CPR 01:31] FORWARD | target=113421 | pos=83825 | error=29596 | current=16.000A | speed=100rpm | MOVING
+[CPR 01:31] FORWARD | target=113421 | pos=87292 | error=26129 | current=18.300A | speed=100rpm | MOVING
+[CPR 01:31] FORWARD | target=113421 | pos=90491 | error=22930 | current=21.500A | speed=100rpm | MOVING
+[CPR 01:31] FORWARD | target=113421 | pos=94224 | error=19197 | current=21.500A | speed=100rpm | MOVING
+[CPR 01:32] FORWARD | target=113421 | pos=99277 | error=14144 | current=23.500A | speed=100rpm | MOVING
+[CPR 01:32] FORWARD | target=113421 | pos=102741 | error=10680 | current=30.500A | speed=100rpm | MOVING
+[CPR 01:32] FORWARD | target=113421 | pos=106458 | error=6963 | current=35.200A | speed=100rpm | MOVING
+[CPR 01:32] FORWARD | target=113421 | pos=111262 | error=2159 | current=35.200A | speed=100rpm | MOVING
+[CPR 01:33] FORWARD | target=113421 | pos=113387 | error=34 | current=35.400A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=16 | bpm=9.9
+
+========== 왕복 17/1000 ==========
+
+[RECIP 17] BACKWARD 시작
+[WARN] [1778074610.347245489] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[CPR 01:33] BACKWARD | target=68421 | pos=113235 | error=44814 | current=17.500A | speed=100rpm | MOVING
+[WARN] [1778074610.442737035] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[CPR 01:33] BACKWARD | target=68421 | pos=109468 | error=41047 | current=8.100A | speed=100rpm | MOVING
+[INFO] [1778074610.857589198] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[CPR 01:33] BACKWARD | target=68421 | pos=105750 | error=37329 | current=7.100A | speed=100rpm | MOVING
+[INFO] [1778074610.954054026] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 01:34] BACKWARD | target=68421 | pos=100950 | error=32529 | current=4.300A | speed=100rpm | MOVING
+[CPR 01:34] BACKWARD | target=68421 | pos=97485 | error=29064 | current=1.800A | speed=100rpm | MOVING
+[CPR 01:34] BACKWARD | target=68421 | pos=93751 | error=25330 | current=1.600A | speed=100rpm | MOVING
+[CPR 01:34] BACKWARD | target=68421 | pos=88697 | error=20276 | current=1.100A | speed=100rpm | MOVING
+[CPR 01:35] BACKWARD | target=68421 | pos=85233 | error=16812 | current=3.000A | speed=100rpm | MOVING
+[CPR 01:35] BACKWARD | target=68421 | pos=80181 | error=11760 | current=2.500A | speed=100rpm | MOVING
+[CPR 01:35] BACKWARD | target=68421 | pos=75384 | error=6963 | current=1.500A | speed=100rpm | MOVING
+[CPR 01:35] BACKWARD | target=68421 | pos=71649 | error=3228 | current=4.700A | speed=100rpm | MOVING
+[CPR 01:36] BACKWARD | target=68421 | pos=68844 | error=423 | current=4.700A | speed=100rpm | REACHED
+
+[RECIP 17] FORWARD 시작
+[CPR 01:36] FORWARD | target=113421 | pos=68582 | error=44839 | current=11.000A | speed=100rpm | MOVING
+[CPR 01:36] FORWARD | target=113421 | pos=71196 | error=42225 | current=13.200A | speed=100rpm | MOVING
+[CPR 01:36] FORWARD | target=113421 | pos=75994 | error=37427 | current=17.700A | speed=100rpm | MOVING
+[CPR 01:37] FORWARD | target=113421 | pos=79464 | error=33957 | current=16.600A | speed=100rpm | MOVING
+[CPR 01:37] FORWARD | target=113421 | pos=84511 | error=28910 | current=16.800A | speed=100rpm | MOVING
+[CPR 01:37] FORWARD | target=113421 | pos=89315 | error=24106 | current=20.200A | speed=100rpm | MOVING
+[CPR 01:37] FORWARD | target=113421 | pos=93049 | error=20372 | current=19.700A | speed=100rpm | MOVING
+[CPR 01:38] FORWARD | target=113421 | pos=98097 | error=15324 | current=22.500A | speed=100rpm | MOVING
+[CPR 01:38] FORWARD | target=113421 | pos=101563 | error=11858 | current=28.100A | speed=100rpm | MOVING
+[CPR 01:38] FORWARD | target=113421 | pos=106610 | error=6811 | current=33.800A | speed=100rpm | MOVING
+[CPR 01:38] FORWARD | target=113421 | pos=109814 | error=3607 | current=34.400A | speed=100rpm | MOVING
+[WARN] [1778074616.049912304] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[CPR 01:39] FORWARD | target=113421 | pos=112945 | error=476 | current=37.500A | speed=100rpm | REACHED
+[ROS COMPRESSION] count=17 | bpm=10.2
+
+========== 왕복 18/1000 ==========
+
+[RECIP 18] BACKWARD 시작
+[CPR 01:39] BACKWARD | target=68421 | pos=113311 | error=44890 | current=19.000A | speed=100rpm | MOVING
+[WARN] [1778074616.417188504] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[CPR 01:39] BACKWARD | target=68421 | pos=111354 | error=42933 | current=10.400A | speed=100rpm | MOVING
+[INFO] [1778074616.529665773] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 01:39] BACKWARD | target=68421 | pos=107638 | error=39217 | current=8.000A | speed=100rpm | MOVING
+[INFO] [1778074616.927519511] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[CPR 01:39] BACKWARD | target=68421 | pos=102836 | error=34415 | current=7.000A | speed=100rpm | MOVING
+[CPR 01:40] BACKWARD | target=68421 | pos=99369 | error=30948 | current=2.400A | speed=100rpm | MOVING
+[CPR 01:40] BACKWARD | target=68421 | pos=95650 | error=27229 | current=1.200A | speed=100rpm | MOVING
+[CPR 01:40] BACKWARD | target=68421 | pos=90851 | error=22430 | current=1.100A | speed=100rpm | MOVING
+[CPR 01:40] BACKWARD | target=68421 | pos=87117 | error=18696 | current=1.700A | speed=100rpm | MOVING
+[CPR 01:41] BACKWARD | target=68421 | pos=82067 | error=13646 | current=3.800A | speed=100rpm | MOVING
+[CPR 01:41] BACKWARD | target=68421 | pos=78863 | error=10442 | current=2.400A | speed=100rpm | MOVING
+[CPR 01:41] BACKWARD | target=68421 | pos=75146 | error=6725 | current=1.700A | speed=100rpm | MOVING
+[CPR 01:41] BACKWARD | target=68421 | pos=71682 | error=3261 | current=5.000A | speed=100rpm | MOVING
+[CPR 01:42] BACKWARD | target=68421 | pos=68980 | error=559 | current=3.700A | speed=100rpm | MOVING
+^C
+[KEYBOARD INTERRUPT] 사용자 Ctrl+C 중단
+[SAFE STOP]
+[EMERGENCY STOP]
+[SERVO OFF]
+(Reboot_cpr) reboot@reboot-desktop:~/Documents/KMS/CPR$ /home/reboot/anaconda3/envs/Reboot_cpr/bin/python /home/reboot/Documents/KMS/CPR/motor/motor_main_08.py
+[INFO] [1778074648.472260925] [motor_ros_bridge]: motor_ros_bridge started
+
+[READY] /motor_start=True 를 기다립니다.
+실행: ros2 topic pub /motor_start std_msgs/Bool "data: true" --once
+정지: ros2 topic pub /motor_stop std_msgs/Bool "data: true" --once
+
+[INFO] [1778074653.608045266] [motor_ros_bridge]: [MOTOR] start command received
+=== 안전 제한 기반 왕복 알고리즘 시작 ===
+[ROS STATE] SETUP
+[SETTING] INITIAL_POS=0
+[SETTING] INITIAL_MOVE_RPM=100
+[SETTING] SEARCH_RPM=30
+[SETTING] RECIP_RPM=500
+[SETTING] SCREW_LEAD_MM_PER_REV=10.0
+[SETTING] GEAR_MOTOR_REV_PER_SCREW_REV=1.5
+[SETTING] TRAVEL_MM=60.0
+[SETTING] TRAVEL_SCREW_REV=6.0
+[SETTING] TRAVEL_MOTOR_REV=9.0
+[SETTING] TRAVEL_UNITS=90000
+[LIMIT] MAX_CURRENT_A=50.0 A
+[LIMIT] position=[-200000, 200000]
+[LIMIT] 모터 정지 요청시 긴급정지
+[SETUP] P02-00=9 Modbus 버스 모드
+[SETUP] 하드웨어 리미트 DI4/DI5 유지
+[SETUP] DI3 = S-ON, Low 유효
+
+=== 1단계: 지정 초기 위치로 이동 ===
+[INITIAL] 목표 초기 위치 INITIAL_POS = 0
+[ROS STATE] INITIAL_MOVING
+[SETUP] PP 위치 모드 | 100 rpm
+[PP PARAM] speed=16666, accel=66664, decel=66664
+[SERVO ON]
+[STATUS] 초기 위치 이동 전 상태 | pos=68421 | speed=0rpm | current=1.800A | fault=0
+[CPR 00:00] MOVE | target=0 | pos=68227 | error=68227 | current=4.800A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=65782 | error=65782 | current=7.800A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=60732 | error=60732 | current=6.200A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=57533 | error=57533 | current=7.600A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=53817 | error=53817 | current=8.900A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=49016 | error=49016 | current=7.500A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=45281 | error=45281 | current=8.000A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=40231 | error=40231 | current=9.200A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=37030 | error=37030 | current=7.400A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=33298 | error=33298 | current=6.700A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=28249 | error=28249 | current=8.800A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=25043 | error=25043 | current=7.400A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=21331 | error=21331 | current=7.800A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=16529 | error=16529 | current=9.300A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=12812 | error=12812 | current=7.500A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=8012 | error=8012 | current=6.900A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=4547 | error=4547 | current=8.600A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=1012 | error=1012 | current=7.200A | speed=0rpm | MOVING
+[CPR 00:00] MOVE | target=0 | pos=137 | error=137 | current=6.900A | speed=0rpm | REACHED
+[INITIAL] 초기 위치 도달 완료
+[STOP]
+[SERVO OFF]
+
+[INPUT] 압박 깊이(cm) 입력 예: 6.0 > 3
+
+=== 2단계 준비: PV 속도모드 전환 ===
+[SETUP] PV 속도 탐색 모드 | 30 rpm
+[SERVO ON]
+[STATUS] PV 탐색 Servo ON 후 상태 | pos=11 | speed=0rpm | current=1.200A | fault=0
+
+=== 2단계: 정회전 탐색 시작 ===
+[GUIDE] /loadcell_total >= 2.0N 이면 현재 위치를 접촉 위치로 저장합니다.
+[GUIDE] /motor_stop=True 또는 /loadcell_stop_request=True 이면 즉시 정지합니다.
+[ROS STATE] SEARCHING
+[SEARCH] 탐색 시작 위치 = 11
+[RUN] 정회전 속도 운전 시작
+[CONTACT] loadcell_total=16.1N | 저장 위치 = 85767
+[ROS STATE] CONTACT_DETECTED
+[STOP]
+[SERVO OFF]
+
+=== 3단계 준비: 3.0 cm 왕복 위치 계산 ===
+[CONTACT_POS]  85767
+[DEPTH_CM]     3.0
+[TRAVEL_MM]    30.0
+[TRAVEL_UNITS] 45000
+[START_POS]    85767
+[END_POS]      130767
+[SETUP] PP 위치 모드 | 500 rpm
+[PP PARAM] speed=83333, accel=333332, decel=333332
+[SERVO ON]
+[STATUS] PP 왕복 Servo ON 후 상태 | pos=72533 | speed=-11rpm | current=4.400A | fault=0
+
+=== 3단계: 3.0 cm 왕복 운동 시작 ===
+[GUIDE] /motor_stop=True 또는 로드셀 정지 요청 시 즉시 정지합니다.
+[RECIP] START_POS = 85767
+[RECIP] END_POS   = 130767
+[RECIP] 반복 횟수 = 1000
+[RECIP] 왕복 속도 = 500 rpm
+[ROS STATE] RECIPROCATING
+
+========== 왕복 1/1000 ==========
+
+[RECIP 1] BACKWARD 시작
+[CPR 00:00] BACKWARD | target=85767 | pos=73470 | error=12297 | current=20.000A | speed=500rpm | MOVING
+[CPR 00:00] BACKWARD | target=85767 | pos=84114 | error=1653 | current=17.300A | speed=500rpm | MOVING
+[CPR 00:00] BACKWARD | target=85767 | pos=85768 | error=1 | current=18.900A | speed=500rpm | REACHED
+
+[RECIP 1] FORWARD 시작
+[CPR 00:00] FORWARD | target=130767 | pos=86704 | error=44063 | current=24.300A | speed=500rpm | MOVING
+[CPR 00:00] FORWARD | target=130767 | pos=98918 | error=31849 | current=34.800A | speed=500rpm | MOVING
+[WARN] 전류 초과 1/5: 54.000 A > 50.000 A
+[CPR 00:01] FORWARD | target=130767 | pos=123812 | error=6955 | current=55.700A | speed=500rpm | MOVING
+[WARN] [1778074684.974134036] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[WARN] 전류 초과 2/5: 58.800 A > 50.000 A
+[CPR 00:01] FORWARD | target=130767 | pos=130749 | error=18 | current=13.700A | speed=500rpm | REACHED
+[ROS COMPRESSION] count=1 | bpm=0.0
+
+========== 왕복 2/1000 ==========
+
+[RECIP 2] BACKWARD 시작
+[CPR 00:01] BACKWARD | target=85767 | pos=129802 | error=44035 | current=17.500A | speed=500rpm | MOVING
+[INFO] [1778074685.468145268] [motor_ros_bridge]: [LOADCELL] warning cleared
+[CPR 00:01] BACKWARD | target=85767 | pos=109592 | error=23825 | current=3.400A | speed=500rpm | MOVING
+[CPR 00:02] BACKWARD | target=85767 | pos=93759 | error=7992 | current=2.300A | speed=500rpm | MOVING
+[CPR 00:02] BACKWARD | target=85767 | pos=85768 | error=1 | current=2.500A | speed=500rpm | REACHED
+
+[RECIP 2] FORWARD 시작
+[CPR 00:02] FORWARD | target=130767 | pos=86706 | error=44061 | current=4.900A | speed=500rpm | MOVING
+[CPR 00:02] FORWARD | target=130767 | pos=105590 | error=25177 | current=3.400A | speed=500rpm | MOVING
+[CPR 00:03] FORWARD | target=130767 | pos=123832 | error=6935 | current=2.300A | speed=500rpm | MOVING
+^C
+[KEYBOARD INTERRUPT] 사용자 Ctrl+C 중단
+[SAFE STOP]
+[EMERGENCY STOP]
+[SERVO OFF]
