@@ -14,6 +14,9 @@ SEARCH_RPM = 50
 # 왕복 속도 (rpm) // 목표 압박 bpm: 117bpm -> 모터는 2106rpm (1bpm = 18rpm)
 RECIP_RPM = 300 #[rpm]
 
+# 접촉 힘 기준
+CONTACT_FORCE_N = 5.0
+
 # 전류 제한
 MAX_CURRENT_A = 50.0 #[A]
 
@@ -99,8 +102,8 @@ MAX_RPM_LIMIT = 2500
 # 왕복 반복 횟수
 REPEAT_COUNT = 1000
 
-# 접촉 힘 기준
-CONTACT_FORCE_N = 2.0
+# # 접촉 힘 기준
+# CONTACT_FORCE_N = 2.0
 
 
 # ============================================================

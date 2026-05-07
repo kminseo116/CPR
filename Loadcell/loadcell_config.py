@@ -13,7 +13,7 @@ RATED_FORCE_N    = FULL_SCALE_KG * GRAVITY   # ≈ 980.7 N
 
 # ── 샘플링 / 필터 ─────────────────────────────────────────────
 DATA_INTERVAL_MS  = 10    # 100 Hz
-MOVING_AVG_WINDOW = 10    # 이동 평균 윈도우 (샘플 수)
+MOVING_AVG_WINDOW = 5    # 이동 평균 윈도우 (샘플 수)
 
 # ── 영점 보정 ─────────────────────────────────────────────────
 ZERO_CAL_DURATION_S  = 2.0
