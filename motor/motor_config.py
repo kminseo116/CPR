@@ -93,8 +93,8 @@ INITIAL_POS = 0
 # * 6  → 목표 속도까지 약 0.17초
 # * 8  → 목표 속도까지 약 0.125초
 # * 10 → 목표 속도까지 약 0.10초
-ACCEL_FACTOR = 4
-DECEL_FACTOR = 4
+ACCEL_FACTOR = 3
+DECEL_FACTOR = 3
 
 # PV 탐색 중 허용 최대 속도 제한 (rpm)
 MAX_RPM_LIMIT = 2500
