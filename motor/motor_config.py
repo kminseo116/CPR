@@ -9,16 +9,16 @@ import serial
 INITIAL_MOVE_RPM = 300
 
 # 접촉 위치 탐색 속도 (rpm)
-SEARCH_RPM = 50
+SEARCH_RPM = 200
 
 # 왕복 속도 (rpm) // 목표 압박 bpm: 117bpm -> 모터는 2106rpm (1bpm = 18rpm)
-RECIP_RPM = 300 #[rpm]
+RECIP_RPM = 2100 #[rpm]
 
 # 접촉 힘 기준
 CONTACT_FORCE_N = 5.0
 
 # 전류 제한
-MAX_CURRENT_A = 50.0 #[A]
+MAX_CURRENT_A = 100.0 #[A]
 
 # 위치 이동 제한 시간 (초) -> 일단 길게 잡음
 MOVE_TIMEOUT = 30.0
@@ -93,8 +93,8 @@ INITIAL_POS = 0
 # * 6  → 목표 속도까지 약 0.17초
 # * 8  → 목표 속도까지 약 0.125초
 # * 10 → 목표 속도까지 약 0.10초
-ACCEL_FACTOR = 3
-DECEL_FACTOR = 3
+ACCEL_FACTOR = 8
+DECEL_FACTOR = 8
 
 # PV 탐색 중 허용 최대 속도 제한 (rpm)
 MAX_RPM_LIMIT = 2500
@@ -129,8 +129,8 @@ MAX_POSITION_CMD =  200000
 # # 전류 제한
 # MAX_CURRENT_A = 50.0
 
-## P0B-24 스케일 (상전류 유효값 A)
-# CURRENT_SCALE = 0.1
+# P0B-24 스케일 (상전류 유효값 A)
+CURRENT_SCALE = 0.1
 
 # 연속 전류 초과 횟수 도달 시 정지
 CURRENT_TRIP_COUNT_LIMIT = 5
