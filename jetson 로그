@@ -1,0 +1,156 @@
+https://docs.nvidia.com/deeplearning/frameworks/install-pytorch-jetson-platform/index.html
+
+reboot@reboot-desktop:~/Downloads$ conda activate Reboot_cpr
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ python3 -c "import torch; print(torch.__version__)"
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'torch'
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ ls /usr/local | grep cuda
+cuda
+cuda-12
+cuda-12.6
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ pip uninstall -y torch torchvision torchaudio
+WARNING: Skipping torch as it is not installed.
+WARNING: Skipping torchvision as it is not installed.
+WARNING: Skipping torchaudio as it is not installed.
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ python3 -m pip install --upgrade pip
+Requirement already satisfied: pip in /home/reboot/anaconda3/envs/Reboot_cpr/lib/python3.10/site-packages (26.0.1)
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ pip install torch torchvision torchaudio --index-url https://pypi.jetson-ai-lab.io/jp6/cu126
+Looking in indexes: https://pypi.jetson-ai-lab.io/jp6/cu126
+Collecting torch
+  Downloading https://pypi.jetson-ai-lab.io/jp6/cu126/%2Bf/37d/7e156cfb4a646/torch-2.10.0-cp310-cp310-linux_aarch64.whl (233.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━ 233.1/233.1 MB 5.9 MB/s  0:00:35
+Collecting torchvision
+  Downloading https://pypi.jetson-ai-lab.io/jp6/cu126/%2Bf/1b6/357c5532db61e/torchvision-0.25.0-cp310-cp310-linux_aarch64.whl (1.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.6/1.6 MB 3.8 MB/s  0:00:00
+Collecting torchaudio
+  Downloading https://pypi.jetson-ai-lab.io/jp6/cu126/%2Bf/692/6eb2c403d4e0e/torchaudio-2.10.0-cp310-cp310-linux_aarch64.whl (710 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━ 710.6/710.6 kB 12.8 MB/s  0:00:00
+Collecting filelock (from torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/426/e9a4660391f7f/filelock-3.24.3-py3-none-any.whl (24 kB)
+Collecting typing-extensions>=4.10.0 (from torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/f0f/a19c6845758ab/typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+Collecting sympy>=1.13.3 (from torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/e09/1cc3e99d2141a/sympy-1.14.0-py3-none-any.whl (6.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 7.4 MB/s  0:00:00
+Collecting networkx>=2.5.1 (from torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/df5/d4365b724cf81/networkx-3.4.2-py3-none-any.whl (1.7 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.7/1.7 MB 6.6 MB/s  0:00:00
+Collecting jinja2 (from torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/85e/ce4451f492d0c/jinja2-3.1.6-py3-none-any.whl (134 kB)
+Collecting fsspec>=0.8.5 (from torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/98d/e475b5cb3bd66/fsspec-2026.2.0-py3-none-any.whl (202 kB)
+Collecting numpy (from torchvision)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/efd/28d4e9cd7d7a8/numpy-2.2.6-cp310-cp310-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (14.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 14.3/14.3 MB 7.0 MB/s  0:00:02
+Collecting pillow!=8.3.*,>=5.3.0 (from torchvision)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/3a5/cbdcddad0af3d/pillow-12.1.1-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (6.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 6.3/6.3 MB 6.4 MB/s  0:00:00
+Collecting mpmath<1.4,>=1.1.0 (from sympy>=1.13.3->torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/a0b/2b9fe80bbcd81/mpmath-1.3.0-py3-none-any.whl (536 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━ 536.2/536.2 kB 9.9 MB/s  0:00:00
+Collecting MarkupSafe>=2.0 (from jinja2->torch)
+  Downloading https://pypi.jetson-ai-lab.io/root/pypi/%2Bf/1ba/88449deb3de88/markupsafe-3.0.3-cp310-cp310-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl (22 kB)
+Installing collected packages: mpmath, typing-extensions, sympy, pillow, numpy, networkx, MarkupSafe, fsspec, filelock, jinja2, torch, torchvision, torchaudio
+Successfully installed MarkupSafe-3.0.3 filelock-3.24.3 fsspec-2026.2.0 jinja2-3.1.6 mpmath-1.3.0 networkx-3.4.2 numpy-2.2.6 pillow-12.1.1 sympy-1.14.0 torch-2.10.0 torchaudio-2.10.0 torchvision-0.25.0 typing-extensions-4.15.0
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ python3 -c "import torch; print('torch', torch.__version__); print('cuda_available', torch.cuda.is_available()); print('torch_cuda', torch.version.cuda)"
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "/home/reboot/anaconda3/envs/Reboot_cpr/lib/python3.10/site-packages/torch/__init__.py", line 431, in <module>
+    from torch._C import *  # noqa: F403
+ImportError: libcudss.so.0: cannot open shared object file: No such file or directory
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ ldconfig -p | grep cudss || true
+sudo find / -name "libcudss.so*" 2>/dev/null | head
+[sudo] password for reboot: 
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ sudo apt update
+Get:1 file:/var/cudnn-local-tegra-repo-ubuntu2204-9.3.0  InRelease [1,572 B]
+Get:2 file:/var/l4t-cuda-tegra-repo-ubuntu2204-12-6-local  InRelease [1,572 B]
+Get:1 file:/var/cudnn-local-tegra-repo-ubuntu2204-9.3.0  InRelease [1,572 B]
+Get:3 file:/var/nv-tensorrt-local-tegra-repo-ubuntu2204-10.3.0-cuda-12.5  InRelease [1,572 B]
+Get:2 file:/var/l4t-cuda-tegra-repo-ubuntu2204-12-6-local  InRelease [1,572 B]
+Get:3 file:/var/nv-tensorrt-local-tegra-repo-ubuntu2204-10.3.0-cuda-12.5  InRelease [1,572 B]
+Get:4 https://download.docker.com/linux/ubuntu jammy InRelease [48.5 kB]
+Hit:5 https://packages.microsoft.com/repos/code stable InRelease           
+Get:6 https://download.docker.com/linux/ubuntu jammy/stable arm64 Packages [69.5 kB]
+Hit:7 http://packages.ros.org/ros2/ubuntu jammy InRelease                  
+Hit:8 https://repo.download.nvidia.com/jetson/common r36.4 InRelease       
+Hit:9 https://repo.download.nvidia.com/jetson/t234 r36.4 InRelease         
+Hit:10 https://repo.download.nvidia.com/jetson/ffmpeg r36.4 InRelease      
+Hit:11 http://ports.ubuntu.com/ubuntu-ports jammy InRelease         
+Hit:12 https://librealsense.intel.com/Debian/apt-repo jammy InRelease
+Get:13 http://ports.ubuntu.com/ubuntu-ports jammy-updates InRelease [128 kB]
+Get:14 http://ports.ubuntu.com/ubuntu-ports jammy-backports InRelease [127 kB]
+Get:15 http://ports.ubuntu.com/ubuntu-ports jammy-security InRelease [129 kB]
+Get:16 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 Packages [3,087 kB]
+Get:17 http://ports.ubuntu.com/ubuntu-ports jammy-updates/main arm64 DEP-11 Metadata [112 kB]
+Get:18 http://ports.ubuntu.com/ubuntu-ports jammy-updates/restricted arm64 DEP-11 Metadata [212 B]
+Get:19 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 Packages [1,290 kB]
+Get:20 http://ports.ubuntu.com/ubuntu-ports jammy-updates/universe arm64 DEP-11 Metadata [356 kB]
+Get:21 http://ports.ubuntu.com/ubuntu-ports jammy-updates/multiverse arm64 DEP-11 Metadata [212 B]
+Get:22 http://ports.ubuntu.com/ubuntu-ports jammy-backports/main arm64 DEP-11 Metadata [3,568 B]
+Get:23 http://ports.ubuntu.com/ubuntu-ports jammy-backports/restricted arm64 DEP-11 Metadata [216 B]
+Get:24 http://ports.ubuntu.com/ubuntu-ports jammy-backports/universe arm64 DEP-11 Metadata [9,736 B]
+Get:25 http://ports.ubuntu.com/ubuntu-ports jammy-backports/multiverse arm64 DEP-11 Metadata [212 B]
+Get:26 http://ports.ubuntu.com/ubuntu-ports jammy-security/main arm64 Packages [2,836 kB]
+Get:27 http://ports.ubuntu.com/ubuntu-ports jammy-security/main Translation-en [427 kB]
+Get:28 http://ports.ubuntu.com/ubuntu-ports jammy-security/main arm64 DEP-11 Metadata [54.6 kB]
+Get:29 http://ports.ubuntu.com/ubuntu-ports jammy-security/restricted Translation-en [979 kB]
+Get:30 http://ports.ubuntu.com/ubuntu-ports jammy-security/restricted arm64 DEP-11 Metadata [208 B]
+Get:31 http://ports.ubuntu.com/ubuntu-ports jammy-security/universe arm64 DEP-11 Metadata [125 kB]
+Get:32 http://ports.ubuntu.com/ubuntu-ports jammy-security/multiverse arm64 DEP-11 Metadata [208 B]
+Fetched 9,783 kB in 8s (1,244 kB/s)                                        
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+1 package can be upgraded. Run 'apt list --upgradable' to see it.
+W: https://librealsense.intel.com/Debian/apt-repo/dists/jammy/InRelease: Key is stored in legacy trusted.gpg keyring (/etc/apt/trusted.gpg), see the DEPRECATION section in apt-key(8) for details.
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ sudo apt install -y cudss-cuda-12
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+E: Unable to locate package cudss-cuda-12
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ sudo ldconfig
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ ldconfig -p | grep cudss
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ pip uninstall -y numpy
+Found existing installation: numpy 2.2.6
+Uninstalling numpy-2.2.6:
+  Successfully uninstalled numpy-2.2.6
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ python
+Python 3.10.19 (main, Oct 21 2025, 16:38:01) [GCC 11.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import numpy as np, torch, torchvision
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+ModuleNotFoundError: No module named 'numpy'
+>>> print(np.__version__)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'np' is not defined
+>>> print(torch.__version__)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'torch' is not defined
+>>> print(torchvision.__version__)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'torchvision' is not defined
+>>> print(torch.cuda.is_available())
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+NameError: name 'torch' is not defined
+>>> 
+(Reboot_cpr) reboot@reboot-desktop:~/Downloads$ python -m pip install -U "nvidia-cudss-cu12"
+Collecting nvidia-cudss-cu12
+  Downloading nvidia_cudss_cu12-0.7.1.6-py3-none-manylinux_2_17_aarch64.whl.metadata (1.8 kB)
+Collecting cuda-toolkit==12.* (from cuda-toolkit[cublas]==12.*->nvidia-cudss-cu12)
+  Downloading cuda_toolkit-12.9.1-py2.py3-none-any.whl.metadata (8.6 kB)
+Collecting nvidia-cublas-cu12==12.9.1.4.* (from cuda-toolkit[cublas]==12.*->nvidia-cudss-cu12)
+  Downloading nvidia_cublas_cu12-12.9.1.4-py3-none-manylinux_2_27_aarch64.whl.metadata (1.7 kB)
+Downloading nvidia_cudss_cu12-0.7.1.6-py3-none-manylinux_2_17_aarch64.whl (79.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 79.8/79.8 MB 15.1 MB/s  0:00:05
+Downloading cuda_toolkit-12.9.1-py2.py3-none-any.whl (2.3 kB)
+Downloading nvidia_cublas_cu12-12.9.1.4-py3-none-manylinux_2_27_aarch64.whl (575.0 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 575.0/575.0 MB 109.0 kB/s  0:00:54
+Installing collected packages: cuda-toolkit, nvidia-cublas-cu12, nvidia-cudss-cu12
+Successfully installed cuda-toolkit-12.9.1 nvidia-cublas-cu12-12.9.1.4 nvidia-cudss-cu12-0.7.1.6
+
