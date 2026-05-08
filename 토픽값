@@ -2,4 +2,11 @@ ros2 topic pub /motor_stop std_msgs/Bool "data: true" --once
 ros2 topic pub /motor_start std_msgs/Bool "data: true" --once
 ros2 topic pub /loadcell_reset
 
-나중에는 속도 바꿔야 함?
+무조건 모터를 키면 제 위치로 가게 해야함
+코드를 끄면 끌 때 초기 위치로 복귀하도록 해야함
+브레이크 기능을 끈다
+전원을 끄고 브레이크가 안 꺼지 
+소프트웨어로 브레이크를 켜서 모터를 움직이게?
+코드를 끄고 나서 브레이크가 꺼지는지 확인 -> 브레이크 켜져있음
+
+비상정지를 눌렀을 떄 초기위치로 돌아가도록
