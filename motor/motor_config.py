@@ -77,7 +77,8 @@ DEFAULT_TRAVEL_UNITS = int(DEFAULT_TRAVEL_MOTOR_REV * COMMAND_UNITS_PER_MOTOR_RE
 MOVE_TO_INITIAL_ON_START = True
 
 # 초기 위치 (P0B-07 / P10-14 기준 지령단위)
-INITIAL_POS = -10000
+# 전원 재연결 후 복귀할 위쪽 안전 초기 위치
+INITIAL_POS = -163788
 
 # # 초기 위치 이동 속도 (rpm)
 # INITIAL_MOVE_RPM = 300
