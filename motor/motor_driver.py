@@ -387,7 +387,7 @@ def wait_until_position_reached(
 
     while True:
         if ros is not None and ros.should_stop():
-            emergency_stop(motor)
+            print("[USER STOP] 위치 이동 중 사용자 정지 요청 감지")
             return False
 
         check_fault(motor)
