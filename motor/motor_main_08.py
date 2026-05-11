@@ -11,6 +11,100 @@ import motor_diagnostics as diag
 CONTACT_FORCE_N = cfg.CONTACT_FORCE_N
 
 # ============================================================
+# 사용자 정지 요청 예외
+# ============================================================
+
+class UserStopRequested(Exception):
+    """
+    사용자의 정지 요청 경우. 바로 Servo OFF 하지 않고 초기 위치로 복귀한 뒤 종료한다.
+    """
+    pass
+
+
+def return_to_initial_and_shutdown(motor, ros=None, reason="USER_STOP"):
+    print("\n[USER STOP] 정지 요청:", reason)
+    print(f"[USER STOP] INITIAL_POS={cfg.INITIAL_POS}로 복귀 후 Servo OFF")
+
+    # 복귀 중 다시 stop으로 판단되지 않도록 플래그 초기화
+    if ros is not None:
+        ros.motor_stop = False
+        ros.loadcell_stop_request = False
+
+    # 1. 현재 동작 먼저 정지
+    try:
+        drv.stop_motion(motor)
+        time.sleep(0.3)
+    except Exception as e:
+        print(f"[WARN] stop_motion 실패: {e}")
+
+    # 2. ROS 상태 publish는 실패해도 무시
+    if ros is not None:
+        try:
+            ros.publish_state("RETURNING_INITIAL")
+            ros.publish_target_position(cfg.INITIAL_POS)
+        except Exception as e:
+            print(f"[WARN] ROS publish 실패: {e}")
+
+    try:
+        # 3. 초기 위치로 복귀
+        drv.check_position_safety(cfg.INITIAL_POS, "INITIAL_POS return")
+
+        drv.setup_position_mode(motor, cfg.INITIAL_MOVE_RPM)
+        drv.servo_on_by_forced_di(motor)
+        time.sleep(0.2)
+
+        print(f"[USER STOP] 초기 위치 복귀 시작: {cfg.INITIAL_POS}")
+        drv.move_absolute_position(motor, cfg.INITIAL_POS)
+
+        # 중요: 복귀 중에는 ros=None
+        # stop flag 때문에 다시 emergency_stop 걸리는 것 방지
+        ok = drv.wait_until_position_reached(
+            motor,
+            cfg.INITIAL_POS,
+            ros=None
+        )
+
+        # 4. 복귀 후 정지 + Servo OFF
+        drv.stop_motion(motor)
+        time.sleep(0.3)
+        drv.servo_off_by_forced_di(motor)
+        time.sleep(0.3)
+
+        if ok:
+            print("[USER STOP] 초기 위치 복귀 후 Servo OFF 완료")
+            if ros is not None:
+                try:
+                    ros.publish_state("STOPPED")
+                except Exception:
+                    pass
+        else:
+            print("[USER STOP] 초기 위치 복귀 실패")
+            if ros is not None:
+                try:
+                    ros.publish_state("SAFE_STOP")
+                except Exception:
+                    pass
+
+        return ok
+
+    except Exception as e:
+        print(f"[ERROR] 초기 위치 복귀 중 오류: {e}")
+        print("[ERROR] safe_stop 실행")
+
+        try:
+            drv.safe_stop(motor)
+        except Exception as stop_e:
+            print(f"[ERROR] safe_stop 실패: {stop_e}")
+
+        if ros is not None:
+            try:
+                ros.publish_state("SAFE_STOP")
+            except Exception:
+                pass
+
+        return False
+
+# ============================================================
 # 1단계: 초기 위치 이동
 # ============================================================
 
@@ -49,7 +143,7 @@ def move_to_initial_position(motor, ros):
 def search_until_loadcell_contact(motor, ros):
     print("\n=== 2단계: 정회전 탐색 시작 ===")
     print(f"[GUIDE] /loadcell_total >= {CONTACT_FORCE_N:.1f}N 이면 현재 위치를 접촉 위치로 저장합니다.")
-    print("[GUIDE] /motor_stop=True 또는 /loadcell_stop_request=True 이면 즉시 정지합니다.")
+    print("[GUIDE] /motor_stop=True 또는 /loadcell_stop_request=True 이면 초기 위치 복귀 후 종료합니다.")
 
     ros.publish_state("SEARCHING")
 
@@ -61,8 +155,7 @@ def search_until_loadcell_contact(motor, ros):
 
     while True:
         if ros.should_stop():
-            drv.emergency_stop(motor)
-            raise RuntimeError("[STOP] 탐색 중 ROS 정지 요청으로 중단")
+            raise UserStopRequested("[STOP] 탐색 중 사용자 정지 요청")
 
         drv.check_fault(motor)
         drv.check_current_safety(motor)
@@ -92,7 +185,7 @@ def search_until_loadcell_contact(motor, ros):
 
             return int(captured_pos)
 
-        time.sleep(0.02)
+        time.sleep(0.005)
 
 
 # ============================================================
@@ -123,43 +216,49 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
         print(f"\n========== 왕복 {i + 1}/{cfg.REPEAT_COUNT} ==========")
 
         if ros.should_stop():
-            drv.emergency_stop(motor)
-            break
+            raise UserStopRequested("[STOP] 왕복 운동 중 사용자 정지 요청")
 
         print(f"\n[RECIP {i + 1}] BACKWARD 시작")
         ros.publish_target_position(start_pos)
         drv.move_absolute_position(motor, start_pos)
 
-        if not drv.wait_until_position_reached(
+        ok = drv.wait_until_position_reached(
             motor, start_pos,
             cycle=i + 1, direction="BACKWARD",
             speed_rpm=cfg.RECIP_RPM, cpr_start_time=cpr_start_time,
             ros=ros
-        ):
+        )
+
+        if not ok:
+            if ros.should_stop():
+                raise UserStopRequested("[STOP] BACKWARD 이동 중 사용자 정지 요청")
             break
 
-        time.sleep(0.005)
+        time.sleep(0.001)
 
         if ros.should_stop():
-            drv.emergency_stop(motor)
-            break
+            raise UserStopRequested("[STOP] 왕복 운동 중 사용자 정지 요청")
 
         print(f"\n[RECIP {i + 1}] FORWARD 시작")
         ros.publish_target_position(end_pos)
         drv.move_absolute_position(motor, end_pos)
 
-        if not drv.wait_until_position_reached(
+        ok = drv.wait_until_position_reached(
             motor, end_pos,
             cycle=i + 1, direction="FORWARD",
             speed_rpm=cfg.RECIP_RPM, cpr_start_time=cpr_start_time,
             ros=ros
-        ):
+        )
+
+        if not ok:
+            if ros.should_stop():
+                raise UserStopRequested("[STOP] FORWARD 이동 중 사용자 정지 요청")
             break
 
         # 왕복 1회 = 압박 1회
         ros.update_compression_count()
 
-        time.sleep(0.005)
+        time.sleep(0.001)
 
     print("\n=== 왕복 운동 종료 ===")
 
@@ -219,7 +318,7 @@ def run_sequence(motor, ros):
         print("[SETTING] 압박 깊이 입력 모드 사용")
     print(f"[LIMIT] MAX_CURRENT_A={cfg.MAX_CURRENT_A} A")
     print(f"[LIMIT] position=[{cfg.MIN_POSITION_CMD}, {cfg.MAX_POSITION_CMD}]")
-    print("[LIMIT] 모터 정지 요청시 긴급정지")
+    print("[LIMIT] 사용자 정지 요청시 초기 위치 복귀 후 Servo OFF")
 
     # Modbus 버스 모드 설정
     print("[SETUP] P02-00=9 Modbus 버스 모드")
@@ -307,13 +406,22 @@ def main():
                 ros.motor_start = False
                 ros.motor_stop = False
 
-                run_sequence(motor, ros)
+                try:
+                    run_sequence(motor, ros)
+
+                except UserStopRequested as e:
+                    print("\n[USER STOP]", e)
+                    return_to_initial_and_shutdown(motor, ros, reason=str(e))
 
                 print("\n[READY] 다시 /motor_start=True 를 기다립니다.")
 
     except KeyboardInterrupt:
         print("\n[KEYBOARD INTERRUPT] 사용자 Ctrl+C 중단")
-        drv.safe_stop(motor)
+        return_to_initial_and_shutdown(motor, None, reason="KeyboardInterrupt")
+
+    except UserStopRequested as e:
+        print("\n[USER STOP]", e)
+        return_to_initial_and_shutdown(motor, ros, reason=str(e))
 
     except Exception as e:
         print("\n[ERROR] 오류 발생:", e)

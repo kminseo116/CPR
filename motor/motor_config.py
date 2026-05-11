@@ -12,13 +12,13 @@ INITIAL_MOVE_RPM = 300
 SEARCH_RPM = 200
 
 # 왕복 속도 (rpm) // 목표 압박 bpm: 117bpm -> 모터는 2106rpm (1bpm = 18rpm)
-RECIP_RPM = 2100 #[rpm]
+RECIP_RPM = 3000 #[rpm]
 
 # 접촉 힘 기준
 CONTACT_FORCE_N = 5.0
 
 # 전류 제한
-MAX_CURRENT_A = 100.0 #[A]
+MAX_CURRENT_A = 150.0 #[A]
 
 # 위치 이동 제한 시간 (초) -> 일단 길게 잡음
 MOVE_TIMEOUT = 30.0
@@ -62,7 +62,7 @@ GEAR_MOTOR_REV_PER_SCREW_REV = 1.5
 
 # 압박 깊이를 입력받지 않는 경우 motor_config.py의 TRAVEL_MM 고정값 사용
 # 입력 기능을 끈 경우 사용할 기본 왕복 이동 거리
-DEFAULT_TRAVEL_MM = 60.0
+DEFAULT_TRAVEL_MM = 50.0
 
 DEFAULT_TRAVEL_SCREW_REV = DEFAULT_TRAVEL_MM / SCREW_LEAD_MM_PER_REV
 DEFAULT_TRAVEL_MOTOR_REV = DEFAULT_TRAVEL_SCREW_REV * GEAR_MOTOR_REV_PER_SCREW_REV
@@ -78,34 +78,21 @@ MOVE_TO_INITIAL_ON_START = True
 
 # 초기 위치 (P0B-07 / P10-14 기준 지령단위)
 # 전원 재연결 후 복귀할 위쪽 안전 초기 위치
-INITIAL_POS = -163788
-
-# # 초기 위치 이동 속도 (rpm)
-# INITIAL_MOVE_RPM = 300
-
-# # 접촉 위치 탐색 속도 (rpm)
-# SEARCH_RPM = 30
-
-# # 왕복 속도 (rpm) // 목표 압박 bpm: 117bpm -> 모터는 2106rpm (1bpm = 18rpm)
-# RECIP_RPM = 500
+INITIAL_POS = -3584
 
 # 가감속
 # * 4  → 목표 속도까지 약 0.25초
 # * 6  → 목표 속도까지 약 0.17초
 # * 8  → 목표 속도까지 약 0.125초
 # * 10 → 목표 속도까지 약 0.10초
-ACCEL_FACTOR = 8
-DECEL_FACTOR = 8
+ACCEL_FACTOR = 12
+DECEL_FACTOR = 12
 
 # PV 탐색 중 허용 최대 속도 제한 (rpm)
 MAX_RPM_LIMIT = 2500
 
 # 왕복 반복 횟수
 REPEAT_COUNT = 1000
-
-# # 접촉 힘 기준
-# CONTACT_FORCE_N = 2.0
-
 
 # ============================================================
 # 압박 깊이 입력 설정
@@ -116,7 +103,7 @@ REPEAT_COUNT = 1000
 USE_INPUT_COMPRESSION_DEPTH = True
 
 # 최대 압박 깊이 [cm]
-MAX_COMPRESSION_DEPTH_CM = 6.0
+MAX_COMPRESSION_DEPTH_CM = 5.0
 
 
 # ============================================================
@@ -137,10 +124,7 @@ CURRENT_SCALE = 0.1
 CURRENT_TRIP_COUNT_LIMIT = 5
 
 # 위치 도달 허용 오차 (지령단위)
-POSITION_TOLERANCE = 500
-
-# # 위치 이동 제한 시간 (초)
-# MOVE_TIMEOUT = 30.0
+POSITION_TOLERANCE = 3000
 
 # 하드웨어 리미트 유지 여부
 KEEP_HARDWARE_LIMITS = True

@@ -1,0 +1,1014 @@
+[ROS STATE] RETURNING_INITIAL
+[SETUP] PP 위치 모드 | 300 rpm
+[PP PARAM] speed=50000, accel=600000, decel=600000
+[SERVO ON]
+[USER STOP] 초기 위치 복귀 시작: -163788
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-19678 | error=144110 | current=1.4000000000000001MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-32844 | error=130944 | current=2.7MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-44845 | error=118943 | current=4.0MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-58444 | error=105344 | current=5.0MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-71196 | error=92592 | current=8.4MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-83195 | error=80593 | current=10.9MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-97557 | error=66231 | current=10.700000000000001MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-109558 | error=54230 | current=9.700000000000001MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-123160 | error=40628 | current=11.5MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-136707 | error=27081 | current=10.3MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-148707 | error=15081 | current=9.5MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-162237 | error=1551 | current=5.9REACHED
+[STOP]
+[SERVO OFF]
+[USER STOP] 초기 위치 복귀 후 Servo OFF 완료
+[ROS STATE] STOPPED
+
+[READY] 다시 /motor_start=True 를 기다립니다.
+^C
+[KEYBOARD INTERRUPT] 사용자 Ctrl+C 중단
+[SAFE STOP]
+[EMERGENCY STOP]
+[SERVO OFF]
+sys:1: RuntimeWarning: coroutine 'Executor._make_handler.<locals>.handler' was never awaited
+(Reboot_cpr) reboot@reboot-desktop:/mnt/ssd/projects/CPR$ /home/reboot/anaconda3/envs/Reboot_cpr/bin/python /mnt/ssd/projects/CPR/motor/motor_main.py
+[INFO] [1778425708.875208450] [motor_ros_bridge]: motor_ros_bridge started
+
+[READY] /motor_start=True 를 기다립니다.
+실행: ros2 topic pub /motor_start std_msgs/Bool "data: true" --once
+정지: ros2 topic pub /motor_stop std_msgs/Bool "data: true" --once
+
+[INFO] [1778425714.306590363] [motor_ros_bridge]: [MOTOR] start command received
+=== 안전 제한 기반 왕복 알고리즘 시작 ===
+[ROS STATE] SETUP
+[SETTING] INITIAL_POS=-163788
+[SETTING] INITIAL_MOVE_RPM=300
+[SETTING] SEARCH_RPM=200
+[SETTING] RECIP_RPM=3000
+[SETTING] SCREW_LEAD_MM_PER_REV=10.0
+[SETTING] GEAR_MOTOR_REV_PER_SCREW_REV=1.5
+[SETTING] 압박 깊이 입력 모드 사용
+[LIMIT] MAX_CURRENT_A=150.0 A
+[LIMIT] position=[-200000, 200000]
+[LIMIT] 사용자 정지 요청시 초기 위치 복귀 후 Servo OFF
+[SETUP] P02-00=9 Modbus 버스 모드
+[SETUP] 하드웨어 리미트 DI4/DI5 유지
+[SETUP] DI3 = S-ON, Low 유효
+
+=== 1단계: 지정 초기 위치로 이동 ===
+[INITIAL] 목표 초기 위치 INITIAL_POS = -163788
+[ROS STATE] INITIAL_MOVING
+[SETUP] PP 위치 모드 | 300 rpm
+[PP PARAM] speed=50000, accel=600000, decel=600000
+[SERVO ON]
+[STATUS] 초기 위치 이동 전 상태 | pos=-163787 | speed=0rpm | current=0.800A | fault=0
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-163787 | error=1 | current=3.4000000000000004REACHED
+[INITIAL] 초기 위치 도달 완료
+[STOP]
+[SERVO OFF]
+
+[INPUT] 압박 깊이(cm) 입력 예: 6.0 > 4
+
+=== 2단계 준비: PV 속도모드 전환 ===
+[SETUP] PV 속도 탐색 모드 | 200 rpm
+[SERVO ON]
+[STATUS] PV 탐색 Servo ON 후 상태 | pos=-163787 | speed=0rpm | current=1.100A | fault=0
+
+=== 2단계: 정회전 탐색 시작 ===
+[GUIDE] /loadcell_total >= 5.0N 이면 현재 위치를 접촉 위치로 저장합니다.
+[GUIDE] /motor_stop=True 또는 /loadcell_stop_request=True 이면 초기 위치 복귀 후 종료합니다.
+[ROS STATE] SEARCHING
+[SEARCH] 탐색 시작 위치 = -163787
+[RUN] 정회전 속도 운전 시작
+[CONTACT] loadcell_total=14.0N | 저장 위치 = -67013
+[ROS STATE] CONTACT_DETECTED
+[STOP]
+[SERVO OFF]
+
+=== 3단계 준비: 4.0 cm 왕복 위치 계산 ===
+[CONTACT_POS]  -67013
+[DEPTH_CM]     4.0
+[TRAVEL_MM]    40.0
+[TRAVEL_UNITS] 60000
+[START_POS]    -67013
+[END_POS]      -7013
+[SETUP] PP 위치 모드 | 3000 rpm
+[PP PARAM] speed=500000, accel=6000000, decel=6000000
+[SERVO ON]
+[STATUS] PP 왕복 Servo ON 후 상태 | pos=-66063 | speed=0rpm | current=4.600A | fault=0
+
+=== 3단계: 4.0 cm 왕복 운동 시작 ===
+[GUIDE] /motor_stop=True 또는 로드셀 정지 요청 시 즉시 정지합니다.
+[RECIP] START_POS = -67013
+[RECIP] END_POS   = -7013
+[RECIP] 반복 횟수 = 1000
+[RECIP] 왕복 속도 = 3000 rpm
+[RECIP] 위치 도달 허용 오차 = 3000 unit
+[ROS STATE] RECIPROCATING
+
+========== 왕복 1/1000 ==========
+[RECIP 1] FORWARD 시작
+[ROS COMPRESSION] count=1 | bpm=0.0
+[CPR 00:00] actual_bpm=208.5 | target=-7013 | pos=-7074 | error=61 | current=0.0REACHED
+[RECIP 1] BACKWARD 시작
+
+========== 왕복 2/1000 ==========
+[RECIP 2] FORWARD 시작
+[ROS COMPRESSION] count=2 | bpm=107.3
+[CPR 00:00] actual_bpm=141.7 | target=-7013 | pos=-8584 | error=1571 | current=0.0REACHED
+[RECIP 2] BACKWARD 시작
+
+========== 왕복 3/1000 ==========
+[RECIP 3] FORWARD 시작
+[ROS COMPRESSION] count=3 | bpm=107.3
+[CPR 00:01] actual_bpm=128.0 | target=-7013 | pos=-8549 | error=1536 | current=0.0REACHED
+[RECIP 3] BACKWARD 시작
+
+========== 왕복 4/1000 ==========
+[RECIP 4] FORWARD 시작
+[ROS COMPRESSION] count=4 | bpm=110.5
+[CPR 00:01] actual_bpm=123.1 | target=-7013 | pos=-8584 | error=1571 | current=0.0REACHED
+[RECIP 4] BACKWARD 시작
+
+========== 왕복 5/1000 ==========
+[RECIP 5] FORWARD 시작
+[ROS COMPRESSION] count=5 | bpm=110.4
+[CPR 00:02] actual_bpm=120.4 | target=-7013 | pos=-7159 | error=146 | current=0.0REACHED
+[RECIP 5] BACKWARD 시작
+
+========== 왕복 6/1000 ==========
+[RECIP 6] FORWARD 시작
+[ROS COMPRESSION] count=6 | bpm=110.5
+[CPR 00:03] actual_bpm=118.6 | target=-7013 | pos=-8721 | error=1708 | current=0.0REACHED
+[RECIP 6] BACKWARD 시작
+
+========== 왕복 7/1000 ==========
+[RECIP 7] FORWARD 시작
+[ROS COMPRESSION] count=7 | bpm=104.4
+[CPR 00:03] actual_bpm=116.3 | target=-7013 | pos=-7163 | error=150 | current=0.0REACHED
+[RECIP 7] BACKWARD 시작
+
+========== 왕복 8/1000 ==========
+[RECIP 8] FORWARD 시작
+[ROS COMPRESSION] count=8 | bpm=110.4
+[CPR 00:04] actual_bpm=115.6 | target=-7013 | pos=-8549 | error=1536 | current=0.0REACHED
+[RECIP 8] BACKWARD 시작
+
+========== 왕복 9/1000 ==========
+[RECIP 9] FORWARD 시작
+[ROS COMPRESSION] count=9 | bpm=104.3
+[CPR 00:04] actual_bpm=114.2 | target=-7013 | pos=-7160 | error=147 | current=0.0REACHED
+[RECIP 9] BACKWARD 시작
+
+========== 왕복 10/1000 ==========
+[RECIP 10] FORWARD 시작
+[ROS COMPRESSION] count=10 | bpm=101.5
+[CPR 00:05] actual_bpm=112.8 | target=-7013 | pos=-8584 | error=1571 | current=0.0REACHED
+[RECIP 10] BACKWARD 시작
+
+========== 왕복 11/1000 ==========
+[RECIP 11] FORWARD 시작
+[ROS COMPRESSION] count=11 | bpm=110.5
+[CPR 00:05] actual_bpm=112.6 | target=-7013 | pos=-8585 | error=1572 | current=0.0REACHED
+[RECIP 11] BACKWARD 시작
+
+========== 왕복 12/1000 ==========
+[RECIP 12] FORWARD 시작
+[ROS COMPRESSION] count=12 | bpm=110.4
+[CPR 00:06] actual_bpm=112.4 | target=-7013 | pos=-8451 | error=1438 | current=0.0REACHED
+[RECIP 12] BACKWARD 시작
+
+========== 왕복 13/1000 ==========
+[RECIP 13] FORWARD 시작
+[ROS COMPRESSION] count=13 | bpm=107.4
+[CPR 00:06] actual_bpm=112.0 | target=-7013 | pos=-7194 | error=181 | current=0.0REACHED
+[RECIP 13] BACKWARD 시작
+
+========== 왕복 14/1000 ==========
+[RECIP 14] FORWARD 시작
+[ROS COMPRESSION] count=14 | bpm=104.3
+[CPR 00:07] actual_bpm=111.4 | target=-7013 | pos=-7163 | error=150 | current=0.0REACHED
+[RECIP 14] BACKWARD 시작
+
+========== 왕복 15/1000 ==========
+[RECIP 15] FORWARD 시작
+[ROS COMPRESSION] count=15 | bpm=104.3
+[CPR 00:08] actual_bpm=110.9 | target=-7013 | pos=-7150 | error=137 | current=0.0REACHED
+[RECIP 15] BACKWARD 시작
+
+========== 왕복 16/1000 ==========
+[RECIP 16] FORWARD 시작
+[ROS COMPRESSION] count=16 | bpm=110.5
+[CPR 00:08] actual_bpm=110.9 | target=-7013 | pos=-8586 | error=1573 | current=0.0REACHED
+[RECIP 16] BACKWARD 시작
+
+========== 왕복 17/1000 ==========
+[RECIP 17] FORWARD 시작
+[ROS COMPRESSION] count=17 | bpm=110.4
+[CPR 00:09] actual_bpm=110.8 | target=-7013 | pos=-8587 | error=1574 | current=0.0REACHED
+[RECIP 17] BACKWARD 시작
+
+========== 왕복 18/1000 ==========
+[RECIP 18] FORWARD 시작
+[ROS COMPRESSION] count=18 | bpm=101.5
+[CPR 00:09] actual_bpm=110.3 | target=-7013 | pos=-7029 | error=16 | current=0.0REACHED
+[RECIP 18] BACKWARD 시작
+
+========== 왕복 19/1000 ==========
+[RECIP 19] FORWARD 시작
+[ROS COMPRESSION] count=19 | bpm=113.8
+[CPR 00:10] actual_bpm=110.5 | target=-7013 | pos=-8587 | error=1574 | current=0.0REACHED
+[RECIP 19] BACKWARD 시작
+
+========== 왕복 20/1000 ==========
+[RECIP 20] FORWARD 시작
+[ROS COMPRESSION] count=20 | bpm=110.5
+[CPR 00:10] actual_bpm=110.5 | target=-7013 | pos=-8553 | error=1540 | current=0.0REACHED
+[RECIP 20] BACKWARD 시작
+
+========== 왕복 21/1000 ==========
+[RECIP 21] FORWARD 시작
+[ROS COMPRESSION] count=21 | bpm=113.8
+[CPR 00:11] actual_bpm=110.6 | target=-7013 | pos=-8727 | error=1714 | current=0.0REACHED
+[RECIP 21] BACKWARD 시작
+
+========== 왕복 22/1000 ==========
+[RECIP 22] FORWARD 시작
+[ROS COMPRESSION] count=22 | bpm=110.5
+[CPR 00:11] actual_bpm=110.6 | target=-7013 | pos=-8692 | error=1679 | current=0.0REACHED
+[RECIP 22] BACKWARD 시작
+
+========== 왕복 23/1000 ==========
+[RECIP 23] FORWARD 시작
+[ROS COMPRESSION] count=23 | bpm=107.3
+[CPR 00:12] actual_bpm=110.5 | target=-7013 | pos=-7205 | error=192 | current=0.0REACHED
+[RECIP 23] BACKWARD 시작
+
+========== 왕복 24/1000 ==========
+[RECIP 24] FORWARD 시작
+[ROS COMPRESSION] count=24 | bpm=110.4
+[CPR 00:13] actual_bpm=110.5 | target=-7013 | pos=-7162 | error=149 | current=0.0REACHED
+[RECIP 24] BACKWARD 시작
+
+========== 왕복 25/1000 ==========
+[RECIP 25] FORWARD 시작
+[ROS COMPRESSION] count=25 | bpm=110.5
+[CPR 00:13] actual_bpm=110.5 | target=-7013 | pos=-8553 | error=1540 | current=0.0REACHED
+[RECIP 25] BACKWARD 시작
+
+========== 왕복 26/1000 ==========
+[RECIP 26] FORWARD 시작
+[ROS COMPRESSION] count=26 | bpm=107.3
+[CPR 00:14] actual_bpm=110.3 | target=-7013 | pos=-8587 | error=1574 | current=0.0REACHED
+[RECIP 26] BACKWARD 시작
+
+========== 왕복 27/1000 ==========
+[RECIP 27] FORWARD 시작
+[ROS COMPRESSION] count=27 | bpm=104.3
+[CPR 00:14] actual_bpm=110.1 | target=-7013 | pos=-8552 | error=1539 | current=0.0REACHED
+[RECIP 27] BACKWARD 시작
+
+========== 왕복 28/1000 ==========
+[RECIP 28] FORWARD 시작
+[ROS COMPRESSION] count=28 | bpm=107.3
+[CPR 00:15] actual_bpm=110.0 | target=-7013 | pos=-7029 | error=16 | current=0.0REACHED
+[RECIP 28] BACKWARD 시작
+
+========== 왕복 29/1000 ==========
+[RECIP 29] FORWARD 시작
+[ROS COMPRESSION] count=29 | bpm=107.3
+[CPR 00:15] actual_bpm=109.9 | target=-7013 | pos=-8553 | error=1540 | current=0.0REACHED
+[RECIP 29] BACKWARD 시작
+
+========== 왕복 30/1000 ==========
+[RECIP 30] FORWARD 시작
+[ROS COMPRESSION] count=30 | bpm=98.9
+[CPR 00:16] actual_bpm=109.5 | target=-7013 | pos=-8453 | error=1440 | current=0.0REACHED
+[RECIP 30] BACKWARD 시작
+
+========== 왕복 31/1000 ==========
+[RECIP 31] FORWARD 시작
+[ROS COMPRESSION] count=31 | bpm=110.4
+[CPR 00:16] actual_bpm=109.5 | target=-7013 | pos=-8727 | error=1714 | current=0.0REACHED
+[RECIP 31] BACKWARD 시작
+
+========== 왕복 32/1000 ==========
+[RECIP 32] FORWARD 시작
+[ROS COMPRESSION] count=32 | bpm=113.8
+[CPR 00:17] actual_bpm=109.7 | target=-7013 | pos=-8691 | error=1678 | current=0.0REACHED
+[RECIP 32] BACKWARD 시작
+
+========== 왕복 33/1000 ==========
+[RECIP 33] FORWARD 시작
+[ROS COMPRESSION] count=33 | bpm=110.4
+[CPR 00:18] actual_bpm=109.7 | target=-7013 | pos=-7160 | error=147 | current=0.0REACHED
+[RECIP 33] BACKWARD 시작
+
+========== 왕복 34/1000 ==========
+[RECIP 34] FORWARD 시작
+[ROS COMPRESSION] count=34 | bpm=107.3
+[CPR 00:18] actual_bpm=109.6 | target=-7013 | pos=-7150 | error=137 | current=0.0REACHED
+[RECIP 34] BACKWARD 시작
+
+========== 왕복 35/1000 ==========
+[RECIP 35] FORWARD 시작
+[ROS COMPRESSION] count=35 | bpm=110.5
+[CPR 00:19] actual_bpm=109.6 | target=-7013 | pos=-8588 | error=1575 | current=0.0REACHED
+[RECIP 35] BACKWARD 시작
+
+========== 왕복 36/1000 ==========
+[RECIP 36] FORWARD 시작
+[ROS COMPRESSION] count=36 | bpm=113.8
+[CPR 00:19] actual_bpm=109.7 | target=-7013 | pos=-8587 | error=1574 | current=0.0REACHED
+[RECIP 36] BACKWARD 시작
+
+========== 왕복 37/1000 ==========
+[RECIP 37] FORWARD 시작
+[ROS COMPRESSION] count=37 | bpm=107.3
+[CPR 00:20] actual_bpm=109.7 | target=-7013 | pos=-7163 | error=150 | current=0.0REACHED
+[RECIP 37] BACKWARD 시작
+
+========== 왕복 38/1000 ==========
+[RECIP 38] FORWARD 시작
+[ROS COMPRESSION] count=38 | bpm=107.3
+[CPR 00:20] actual_bpm=109.6 | target=-7013 | pos=-7207 | error=194 | current=0.0REACHED
+[RECIP 38] BACKWARD 시작
+
+========== 왕복 39/1000 ==========
+[RECIP 39] FORWARD 시작
+[ROS COMPRESSION] count=39 | bpm=101.5
+[CPR 00:21] actual_bpm=109.4 | target=-7013 | pos=-7154 | error=141 | current=0.0REACHED
+[RECIP 39] BACKWARD 시작
+
+========== 왕복 40/1000 ==========
+[RECIP 40] FORWARD 시작
+[ROS COMPRESSION] count=40 | bpm=107.3
+[CPR 00:21] actual_bpm=109.3 | target=-7013 | pos=-7030 | error=17 | current=0.0REACHED
+[RECIP 40] BACKWARD 시작
+
+========== 왕복 41/1000 ==========
+[RECIP 41] FORWARD 시작
+[ROS COMPRESSION] count=41 | bpm=110.4
+[CPR 00:22] actual_bpm=109.4 | target=-7013 | pos=-8552 | error=1539 | current=0.0REACHED
+[RECIP 41] BACKWARD 시작
+
+========== 왕복 42/1000 ==========
+[RECIP 42] FORWARD 시작
+[ROS COMPRESSION] count=42 | bpm=113.8
+[CPR 00:23] actual_bpm=109.5 | target=-7013 | pos=-8589 | error=1576 | current=0.0REACHED
+[RECIP 42] BACKWARD 시작
+
+========== 왕복 43/1000 ==========
+[RECIP 43] FORWARD 시작
+[ROS COMPRESSION] count=43 | bpm=101.5
+[CPR 00:23] actual_bpm=109.3 | target=-7013 | pos=-7025 | error=12 | current=0.0REACHED
+[RECIP 43] BACKWARD 시작
+
+========== 왕복 44/1000 ==========
+[RECIP 44] FORWARD 시작
+[ROS COMPRESSION] count=44 | bpm=110.4
+[CPR 00:24] actual_bpm=109.3 | target=-7013 | pos=-8419 | error=1406 | current=0.0REACHED
+[RECIP 44] BACKWARD 시작
+
+========== 왕복 45/1000 ==========
+[RECIP 45] FORWARD 시작
+[ROS COMPRESSION] count=45 | bpm=107.3
+[CPR 00:24] actual_bpm=109.3 | target=-7013 | pos=-7162 | error=149 | current=0.0REACHED
+[RECIP 45] BACKWARD 시작
+
+========== 왕복 46/1000 ==========
+[RECIP 46] FORWARD 시작
+[ROS COMPRESSION] count=46 | bpm=110.4
+[CPR 00:25] actual_bpm=109.3 | target=-7013 | pos=-8420 | error=1407 | current=0.0REACHED
+[RECIP 46] BACKWARD 시작
+
+========== 왕복 47/1000 ==========
+[RECIP 47] FORWARD 시작
+[ROS COMPRESSION] count=47 | bpm=101.6
+[CPR 00:25] actual_bpm=109.1 | target=-7013 | pos=-8586 | error=1573 | current=0.0REACHED
+[RECIP 47] BACKWARD 시작
+
+========== 왕복 48/1000 ==========
+[RECIP 48] FORWARD 시작
+[ERROR] [1778425750.097535927] [motor_ros_bridge]: [MOTOR] stop command received
+
+[USER STOP] [STOP] 왕복 운동 중 사용자 정지 요청
+
+[USER STOP] 정지 요청: [STOP] 왕복 운동 중 사용자 정지 요청
+[USER STOP] INITIAL_POS=-163788로 복귀 후 Servo OFF
+[STOP]
+[ROS STATE] RETURNING_INITIAL
+[SETUP] PP 위치 모드 | 300 rpm
+[PP PARAM] speed=50000, accel=600000, decel=600000
+[SERVO ON]
+[USER STOP] 초기 위치 복귀 시작: -163788
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-51977 | error=111811 | current=6.4MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-65138 | error=98650 | current=4.5MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-77141 | error=86647 | current=7.0MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-90687 | error=73101 | current=8.1MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-102685 | error=61103 | current=9.1MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-115500 | error=48288 | current=10.0MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-129052 | error=34736 | current=10.9MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-141050 | error=22738 | current=11.700000000000001MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-154648 | error=9140 | current=10.4MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-163057 | error=731 | current=4.800000000000001REACHED
+[STOP]
+[SERVO OFF]
+[USER STOP] 초기 위치 복귀 후 Servo OFF 완료
+[ROS STATE] STOPPED
+
+[READY] 다시 /motor_start=True 를 기다립니다.
+^C
+[KEYBOARD INTERRUPT] 사용자 Ctrl+C 중단
+[SAFE STOP]
+[EMERGENCY STOP]
+[SERVO OFF]
+(Reboot_cpr) reboot@reboot-desktop:/mnt/ssd/projects/CPR$ /home/reboot/anaconda3/envs/Reboot_cpr/bin/python /mnt/ssd/projects/CPR/motor/motor_main.py
+[INFO] [1778426039.422105820] [motor_ros_bridge]: motor_ros_bridge started
+
+[READY] /motor_start=True 를 기다립니다.
+실행: ros2 topic pub /motor_start std_msgs/Bool "data: true" --once
+정지: ros2 topic pub /motor_stop std_msgs/Bool "data: true" --once
+
+[INFO] [1778426061.765449297] [motor_ros_bridge]: [MOTOR] start command received
+=== 안전 제한 기반 왕복 알고리즘 시작 ===
+[ROS STATE] SETUP
+[SETTING] INITIAL_POS=-163788
+[SETTING] INITIAL_MOVE_RPM=300
+[SETTING] SEARCH_RPM=200
+[SETTING] RECIP_RPM=3000
+[SETTING] SCREW_LEAD_MM_PER_REV=10.0
+[SETTING] GEAR_MOTOR_REV_PER_SCREW_REV=1.5
+[SETTING] 압박 깊이 입력 모드 사용
+[LIMIT] MAX_CURRENT_A=150.0 A
+[LIMIT] position=[-200000, 200000]
+[LIMIT] 사용자 정지 요청시 초기 위치 복귀 후 Servo OFF
+[SETUP] P02-00=9 Modbus 버스 모드
+[SETUP] 하드웨어 리미트 DI4/DI5 유지
+[SETUP] DI3 = S-ON, Low 유효
+
+=== 1단계: 지정 초기 위치로 이동 ===
+[INITIAL] 목표 초기 위치 INITIAL_POS = -163788
+[ROS STATE] INITIAL_MOVING
+[SETUP] PP 위치 모드 | 300 rpm
+[PP PARAM] speed=50000, accel=600000, decel=600000
+[SERVO ON]
+[STATUS] 초기 위치 이동 전 상태 | pos=-163786 | speed=0rpm | current=0.900A | fault=0
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-163787 | error=1 | current=3.6REACHED
+[INITIAL] 초기 위치 도달 완료
+[STOP]
+[SERVO OFF]
+
+[INPUT] 압박 깊이(cm) 입력 예: 6.0 > 4
+
+=== 2단계 준비: PV 속도모드 전환 ===
+[SETUP] PV 속도 탐색 모드 | 200 rpm
+[SERVO ON]
+[STATUS] PV 탐색 Servo ON 후 상태 | pos=-163786 | speed=0rpm | current=1.300A | fault=0
+
+=== 2단계: 정회전 탐색 시작 ===
+[GUIDE] /loadcell_total >= 5.0N 이면 현재 위치를 접촉 위치로 저장합니다.
+[GUIDE] /motor_stop=True 또는 /loadcell_stop_request=True 이면 초기 위치 복귀 후 종료합니다.
+[ROS STATE] SEARCHING
+[SEARCH] 탐색 시작 위치 = -163786
+[RUN] 정회전 속도 운전 시작
+[CONTACT] loadcell_total=16.4N | 저장 위치 = -67010
+[ROS STATE] CONTACT_DETECTED
+[STOP]
+[SERVO OFF]
+
+=== 3단계 준비: 4.0 cm 왕복 위치 계산 ===
+[CONTACT_POS]  -67010
+[DEPTH_CM]     4.0
+[TRAVEL_MM]    40.0
+[TRAVEL_UNITS] 60000
+[START_POS]    -67010
+[END_POS]      -7010
+[SETUP] PP 위치 모드 | 3000 rpm
+[PP PARAM] speed=500000, accel=6000000, decel=6000000
+[SERVO ON]
+[STATUS] PP 왕복 Servo ON 후 상태 | pos=-66350 | speed=0rpm | current=3.500A | fault=0
+
+=== 3단계: 4.0 cm 왕복 운동 시작 ===
+[GUIDE] /motor_stop=True 또는 로드셀 정지 요청 시 즉시 정지합니다.
+[RECIP] START_POS = -67010
+[RECIP] END_POS   = -7010
+[RECIP] 반복 횟수 = 1000
+[RECIP] 왕복 속도 = 3000 rpm
+[RECIP] 위치 도달 허용 오차 = 3000 unit
+[ROS STATE] RECIPROCATING
+
+========== 왕복 1/1000 ==========
+[RECIP 1] FORWARD 시작
+[ROS COMPRESSION] count=1 | bpm=0.0
+[CPR 00:00] actual_bpm=208.7 | target=-7010 | pos=-7095 | error=85 | current=0.0REACHED
+[RECIP 1] BACKWARD 시작
+[WARN] [1778426073.660223431] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426073.834623806] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 2/1000 ==========
+[RECIP 2] FORWARD 시작
+[ROS COMPRESSION] count=2 | bpm=101.5
+[CPR 00:00] actual_bpm=136.6 | target=-7010 | pos=-7013 | error=3 | current=0.0REACHED
+[RECIP 2] BACKWARD 시작
+[WARN] [1778426074.282763514] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[INFO] [1778426074.425752375] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 3/1000 ==========
+[RECIP 3] FORWARD 시작
+[ROS COMPRESSION] count=3 | bpm=107.3
+[CPR 00:01] actual_bpm=125.2 | target=-7010 | pos=-7158 | error=148 | current=0.0REACHED
+[RECIP 3] BACKWARD 시작
+
+========== 왕복 4/1000 ==========
+[RECIP 4] FORWARD 시작
+[ROS COMPRESSION] count=4 | bpm=101.5
+[CPR 00:02] actual_bpm=118.3 | target=-7010 | pos=-8581 | error=1571 | current=0.0REACHED
+[RECIP 4] BACKWARD 시작
+
+========== 왕복 5/1000 ==========
+[RECIP 5] FORWARD 시작
+[ROS COMPRESSION] count=5 | bpm=110.4
+[CPR 00:02] actual_bpm=116.6 | target=-7010 | pos=-8414 | error=1404 | current=0.0REACHED
+[RECIP 5] BACKWARD 시작
+
+========== 왕복 6/1000 ==========
+[RECIP 6] FORWARD 시작
+[ROS COMPRESSION] count=6 | bpm=113.8
+[CPR 00:03] actual_bpm=116.2 | target=-7010 | pos=-8581 | error=1571 | current=0.0REACHED
+[RECIP 6] BACKWARD 시작
+[WARN] [1778426076.502839677] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+========== 왕복 7/1000 ==========
+[RECIP 7] FORWARD 시작
+[INFO] [1778426076.758958213] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=7 | bpm=107.3
+[CPR 00:03] actual_bpm=114.8 | target=-7010 | pos=-7147 | error=137 | current=0.0REACHED
+[RECIP 7] BACKWARD 시작
+[WARN] [1778426077.109780166] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+
+========== 왕복 8/1000 ==========
+[RECIP 8] FORWARD 시작
+[INFO] [1778426077.302316072] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[ROS COMPRESSION] count=8 | bpm=107.3
+[CPR 00:04] actual_bpm=113.8 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 8] BACKWARD 시작
+[WARN] [1778426077.590204755] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426077.732628834] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 9/1000 ==========
+[RECIP 9] FORWARD 시작
+[ROS COMPRESSION] count=9 | bpm=110.5
+[CPR 00:04] actual_bpm=113.4 | target=-7010 | pos=-8582 | error=1572 | current=0.0REACHED
+[RECIP 9] BACKWARD 시작
+[WARN] [1778426078.196087105] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426078.228417298] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+========== 왕복 10/1000 ==========
+[RECIP 10] FORWARD 시작
+[INFO] [1778426078.435495811] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778426078.467295175] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=10 | bpm=107.3
+[CPR 00:05] actual_bpm=112.8 | target=-7010 | pos=-7147 | error=137 | current=0.0REACHED
+[RECIP 10] BACKWARD 시작
+[WARN] [1778426078.693067664] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426078.882859340] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 11/1000 ==========
+[RECIP 11] FORWARD 시작
+[ROS COMPRESSION] count=11 | bpm=104.3
+[CPR 00:05] actual_bpm=112.0 | target=-7010 | pos=-7160 | error=150 | current=0.0REACHED
+[RECIP 11] BACKWARD 시작
+[WARN] [1778426079.298685016] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426079.331132236] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426079.457974866] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 12/1000 ==========
+[RECIP 12] FORWARD 시작
+[INFO] [1778426079.554966021] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=12 | bpm=110.5
+[CPR 00:06] actual_bpm=111.8 | target=-7010 | pos=-8547 | error=1537 | current=0.0REACHED
+[RECIP 12] BACKWARD 시작
+[WARN] [1778426079.905704036] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+
+========== 왕복 13/1000 ==========
+[RECIP 13] FORWARD 시작
+[INFO] [1778426080.177427447] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[ROS COMPRESSION] count=13 | bpm=101.5
+[CPR 00:07] actual_bpm=111.0 | target=-7010 | pos=-8582 | error=1572 | current=0.0REACHED
+[RECIP 13] BACKWARD 시작
+
+========== 왕복 14/1000 ==========
+[RECIP 14] FORWARD 시작
+[ROS COMPRESSION] count=14 | bpm=101.5
+[CPR 00:07] actual_bpm=110.2 | target=-7010 | pos=-7021 | error=11 | current=0.0REACHED
+[RECIP 14] BACKWARD 시작
+[WARN] [1778426081.024358866] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426081.056058931] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426081.167644215] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 15/1000 ==========
+[RECIP 15] FORWARD 시작
+[INFO] [1778426081.264483430] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=15 | bpm=107.3
+[CPR 00:08] actual_bpm=110.0 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 15] BACKWARD 시작
+[WARN] [1778426081.630801328] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+
+========== 왕복 16/1000 ==========
+[RECIP 16] FORWARD 시작
+[INFO] [1778426081.886543726] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[ROS COMPRESSION] count=16 | bpm=101.5
+[CPR 00:08] actual_bpm=109.5 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 16] BACKWARD 시작
+[WARN] [1778426082.143221317] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426082.301779916] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 17/1000 ==========
+[RECIP 17] FORWARD 시작
+[ROS COMPRESSION] count=17 | bpm=104.3
+[CPR 00:09] actual_bpm=109.1 | target=-7010 | pos=-7024 | error=14 | current=0.0REACHED
+[RECIP 17] BACKWARD 시작
+[WARN] [1778426082.749486975] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426082.781082301] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426082.908828633] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 18/1000 ==========
+[RECIP 18] FORWARD 시작
+[INFO] [1778426083.005748555] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=18 | bpm=107.3
+[CPR 00:09] actual_bpm=109.0 | target=-7010 | pos=-8581 | error=1571 | current=0.0REACHED
+[RECIP 18] BACKWARD 시작
+
+========== 왕복 19/1000 ==========
+[RECIP 19] FORWARD 시작
+[ROS COMPRESSION] count=19 | bpm=104.3
+[CPR 00:10] actual_bpm=108.8 | target=-7010 | pos=-7147 | error=137 | current=0.0REACHED
+[RECIP 19] BACKWARD 시작
+
+========== 왕복 20/1000 ==========
+[RECIP 20] FORWARD 시작
+[ROS COMPRESSION] count=20 | bpm=107.4
+[CPR 00:11] actual_bpm=108.7 | target=-7010 | pos=-8584 | error=1574 | current=0.0REACHED
+[RECIP 20] BACKWARD 시작
+[WARN] [1778426084.442813705] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426084.474900308] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426084.602283335] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 21/1000 ==========
+[RECIP 21] FORWARD 시작
+[INFO] [1778426084.699166264] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=21 | bpm=110.5
+[CPR 00:11] actual_bpm=108.8 | target=-7010 | pos=-8550 | error=1540 | current=0.0REACHED
+[RECIP 21] BACKWARD 시작
+[WARN] [1778426085.001637332] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426085.034094536] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+========== 왕복 22/1000 ==========
+[RECIP 22] FORWARD 시작
+[INFO] [1778426085.272643349] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778426085.305156907] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=22 | bpm=104.3
+[CPR 00:12] actual_bpm=108.6 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 22] BACKWARD 시작
+
+========== 왕복 23/1000 ==========
+[RECIP 23] FORWARD 시작
+[ROS COMPRESSION] count=23 | bpm=104.3
+[CPR 00:12] actual_bpm=108.4 | target=-7010 | pos=-7025 | error=15 | current=0.0REACHED
+[RECIP 23] BACKWARD 시작
+[WARN] [1778426086.136105779] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426086.168456965] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426086.279389752] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 24/1000 ==========
+[RECIP 24] FORWARD 시작
+[INFO] [1778426086.376438445] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=24 | bpm=110.4
+[CPR 00:13] actual_bpm=108.5 | target=-7010 | pos=-8551 | error=1541 | current=0.0REACHED
+[RECIP 24] BACKWARD 시작
+
+========== 왕복 25/1000 ==========
+[RECIP 25] FORWARD 시작
+[ROS COMPRESSION] count=25 | bpm=107.4
+[CPR 00:13] actual_bpm=108.4 | target=-7010 | pos=-7158 | error=148 | current=0.0REACHED
+[RECIP 25] BACKWARD 시작
+[WARN] [1778426087.207511385] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426087.398061673] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 26/1000 ==========
+[RECIP 26] FORWARD 시작
+[ROS COMPRESSION] count=26 | bpm=104.3
+[CPR 00:14] actual_bpm=108.3 | target=-7010 | pos=-7121 | error=111 | current=0.0REACHED
+[RECIP 26] BACKWARD 시작
+[WARN] [1778426087.782921096] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426087.813407147] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426087.924396512] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778426087.956706448] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 27/1000 ==========
+[RECIP 27] FORWARD 시작
+[ROS COMPRESSION] count=27 | bpm=107.3
+[CPR 00:14] actual_bpm=108.2 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 27] BACKWARD 시작
+[WARN] [1778426088.372952745] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+========== 왕복 28/1000 ==========
+[RECIP 28] FORWARD 시작
+[INFO] [1778426088.643180694] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=28 | bpm=113.8
+[CPR 00:15] actual_bpm=108.4 | target=-7010 | pos=-8550 | error=1540 | current=0.0REACHED
+[RECIP 28] BACKWARD 시작
+
+========== 왕복 29/1000 ==========
+[RECIP 29] FORWARD 시작
+[ROS COMPRESSION] count=29 | bpm=101.5
+[CPR 00:16] actual_bpm=108.2 | target=-7010 | pos=-7013 | error=3 | current=0.0REACHED
+[RECIP 29] BACKWARD 시작
+[WARN] [1778426089.491393940] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[INFO] [1778426089.650275172] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 30/1000 ==========
+[RECIP 30] FORWARD 시작
+[ROS COMPRESSION] count=30 | bpm=104.4
+[CPR 00:16] actual_bpm=108.0 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 30] BACKWARD 시작
+
+========== 왕복 31/1000 ==========
+[RECIP 31] FORWARD 시작
+[ROS COMPRESSION] count=31 | bpm=107.3
+[CPR 00:17] actual_bpm=108.0 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 31] BACKWARD 시작
+[WARN] [1778426090.594381786] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426090.754734031] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 32/1000 ==========
+[RECIP 32] FORWARD 시작
+[ROS COMPRESSION] count=32 | bpm=101.5
+[CPR 00:17] actual_bpm=107.8 | target=-7010 | pos=-7024 | error=14 | current=0.0REACHED
+[RECIP 32] BACKWARD 시작
+[WARN] [1778426091.216473733] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[INFO] [1778426091.359694569] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 33/1000 ==========
+[RECIP 33] FORWARD 시작
+[ROS COMPRESSION] count=33 | bpm=107.3
+[CPR 00:18] actual_bpm=107.8 | target=-7010 | pos=-8550 | error=1540 | current=0.0REACHED
+[RECIP 33] BACKWARD 시작
+
+========== 왕복 34/1000 ==========
+[RECIP 34] FORWARD 시작
+[ROS COMPRESSION] count=34 | bpm=107.3
+[CPR 00:18] actual_bpm=107.8 | target=-7010 | pos=-7159 | error=149 | current=0.0REACHED
+[RECIP 34] BACKWARD 시작
+[WARN] [1778426092.303397174] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426092.493786210] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 35/1000 ==========
+[RECIP 35] FORWARD 시작
+[ROS COMPRESSION] count=35 | bpm=107.3
+[CPR 00:19] actual_bpm=107.7 | target=-7010 | pos=-8551 | error=1541 | current=0.0REACHED
+[RECIP 35] BACKWARD 시작
+[WARN] [1778426092.893694494] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426092.925813290] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426093.053364418] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 36/1000 ==========
+[RECIP 36] FORWARD 시작
+[INFO] [1778426093.149981676] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=36 | bpm=110.5
+[CPR 00:20] actual_bpm=107.8 | target=-7010 | pos=-8584 | error=1574 | current=0.0REACHED
+[RECIP 36] BACKWARD 시작
+[WARN] [1778426093.500529448] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+
+========== 왕복 37/1000 ==========
+[RECIP 37] FORWARD 시작
+[INFO] [1778426093.772132153] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[ROS COMPRESSION] count=37 | bpm=101.5
+[CPR 00:20] actual_bpm=107.6 | target=-7010 | pos=-8724 | error=1714 | current=0.0REACHED
+[RECIP 37] BACKWARD 시작
+
+========== 왕복 38/1000 ==========
+[RECIP 38] FORWARD 시작
+[ROS COMPRESSION] count=38 | bpm=107.4
+[CPR 00:21] actual_bpm=107.6 | target=-7010 | pos=-7189 | error=179 | current=0.0REACHED
+[RECIP 38] BACKWARD 시작
+[WARN] [1778426094.586801161] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426094.619051192] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426094.730491737] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 39/1000 ==========
+[RECIP 39] FORWARD 시작
+[INFO] [1778426094.827523854] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=39 | bpm=110.4
+[CPR 00:21] actual_bpm=107.7 | target=-7010 | pos=-8584 | error=1574 | current=0.0REACHED
+[RECIP 39] BACKWARD 시작
+
+========== 왕복 40/1000 ==========
+[RECIP 40] FORWARD 시작
+[ROS COMPRESSION] count=40 | bpm=101.5
+[CPR 00:22] actual_bpm=107.5 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 40] BACKWARD 시작
+
+========== 왕복 41/1000 ==========
+[RECIP 41] FORWARD 시작
+[ROS COMPRESSION] count=41 | bpm=98.9
+[CPR 00:22] actual_bpm=107.3 | target=-7010 | pos=-7012 | error=2 | current=0.0REACHED
+[RECIP 41] BACKWARD 시작
+
+========== 왕복 42/1000 ==========
+[RECIP 42] FORWARD 시작
+[ROS COMPRESSION] count=42 | bpm=110.5
+[CPR 00:23] actual_bpm=107.4 | target=-7010 | pos=-8551 | error=1541 | current=0.0REACHED
+[RECIP 42] BACKWARD 시작
+
+========== 왕복 43/1000 ==========
+[RECIP 43] FORWARD 시작
+[ROS COMPRESSION] count=43 | bpm=107.3
+[CPR 00:24] actual_bpm=107.4 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 43] BACKWARD 시작
+[WARN] [1778426097.430800985] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+========== 왕복 44/1000 ==========
+[RECIP 44] FORWARD 시작
+[INFO] [1778426097.686909955] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=44 | bpm=104.3
+[CPR 00:24] actual_bpm=107.3 | target=-7010 | pos=-7026 | error=16 | current=0.0REACHED
+[RECIP 44] BACKWARD 시작
+[WARN] [1778426098.020937854] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426098.057072688] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426098.181274323] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 45/1000 ==========
+[RECIP 45] FORWARD 시작
+[INFO] [1778426098.278074178] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=45 | bpm=104.3
+[CPR 00:25] actual_bpm=107.2 | target=-7010 | pos=-8450 | error=1440 | current=0.0REACHED
+[RECIP 45] BACKWARD 시작
+
+========== 왕복 46/1000 ==========
+[RECIP 46] FORWARD 시작
+[ROS COMPRESSION] count=46 | bpm=101.5
+[CPR 00:25] actual_bpm=107.1 | target=-7010 | pos=-8724 | error=1714 | current=0.0REACHED
+[RECIP 46] BACKWARD 시작
+
+========== 왕복 47/1000 ==========
+[RECIP 47] FORWARD 시작
+[ROS COMPRESSION] count=47 | bpm=104.3
+[CPR 00:26] actual_bpm=107.0 | target=-7010 | pos=-7148 | error=138 | current=0.0REACHED
+[RECIP 47] BACKWARD 시작
+[WARN] [1778426099.716214659] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426099.874645448] [motor_ros_bridge]: [LOADCELL] warning cleared
+
+========== 왕복 48/1000 ==========
+[RECIP 48] FORWARD 시작
+[ROS COMPRESSION] count=48 | bpm=110.5
+[CPR 00:26] actual_bpm=107.1 | target=-7010 | pos=-8586 | error=1576 | current=0.0REACHED
+[RECIP 48] BACKWARD 시작
+[WARN] [1778426100.322551235] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+
+========== 왕복 49/1000 ==========
+[RECIP 49] FORWARD 시작
+[INFO] [1778426100.562606967] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[ROS COMPRESSION] count=49 | bpm=113.8
+[CPR 00:27] actual_bpm=107.2 | target=-7010 | pos=-8551 | error=1541 | current=0.0REACHED
+[RECIP 49] BACKWARD 시작
+
+========== 왕복 50/1000 ==========
+[RECIP 50] FORWARD 시작
+[ROS COMPRESSION] count=50 | bpm=104.3
+[CPR 00:27] actual_bpm=107.2 | target=-7010 | pos=-7020 | error=10 | current=0.0REACHED
+[RECIP 50] BACKWARD 시작
+[WARN] [1778426101.393110041] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[INFO] [1778426101.552380051] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 51/1000 ==========
+[RECIP 51] FORWARD 시작
+[ROS COMPRESSION] count=51 | bpm=104.3
+[CPR 00:28] actual_bpm=107.1 | target=-7010 | pos=-7149 | error=139 | current=0.0REACHED
+[RECIP 51] BACKWARD 시작
+
+========== 왕복 52/1000 ==========
+[RECIP 52] FORWARD 시작
+[ROS COMPRESSION] count=52 | bpm=101.5
+[CPR 00:29] actual_bpm=107.0 | target=-7010 | pos=-7158 | error=148 | current=0.0REACHED
+[RECIP 52] BACKWARD 시작
+
+========== 왕복 53/1000 ==========
+[RECIP 53] FORWARD 시작
+[ROS COMPRESSION] count=53 | bpm=101.5
+[CPR 00:29] actual_bpm=106.9 | target=-7010 | pos=-7013 | error=3 | current=0.0REACHED
+[RECIP 53] BACKWARD 시작
+
+========== 왕복 54/1000 ==========
+[RECIP 54] FORWARD 시작
+[ROS COMPRESSION] count=54 | bpm=107.4
+[CPR 00:30] actual_bpm=106.9 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 54] BACKWARD 시작
+
+========== 왕복 55/1000 ==========
+[RECIP 55] FORWARD 시작
+[ROS COMPRESSION] count=55 | bpm=101.4
+[CPR 00:30] actual_bpm=106.8 | target=-7010 | pos=-8449 | error=1439 | current=0.0REACHED
+[RECIP 55] BACKWARD 시작
+
+========== 왕복 56/1000 ==========
+[RECIP 56] FORWARD 시작
+[ROS COMPRESSION] count=56 | bpm=110.6
+[CPR 00:31] actual_bpm=106.9 | target=-7010 | pos=-7150 | error=140 | current=0.0REACHED
+[RECIP 56] BACKWARD 시작
+[WARN] [1778426104.843864891] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426104.875197747] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[INFO] [1778426105.003312122] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 57/1000 ==========
+[RECIP 57] FORWARD 시작
+[INFO] [1778426105.100262189] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=57 | bpm=104.3
+[CPR 00:32] actual_bpm=106.8 | target=-7010 | pos=-7157 | error=147 | current=0.0REACHED
+[RECIP 57] BACKWARD 시작
+
+========== 왕복 58/1000 ==========
+[RECIP 58] FORWARD 시작
+[ROS COMPRESSION] count=58 | bpm=110.5
+[CPR 00:32] actual_bpm=106.9 | target=-7010 | pos=-7147 | error=137 | current=0.0REACHED
+[RECIP 58] BACKWARD 시작
+
+========== 왕복 59/1000 ==========
+[RECIP 59] FORWARD 시작
+[ROS COMPRESSION] count=59 | bpm=110.5
+[CPR 00:33] actual_bpm=106.9 | target=-7010 | pos=-8725 | error=1715 | current=0.0REACHED
+[RECIP 59] BACKWARD 시작
+[WARN] [1778426106.537366296] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+========== 왕복 60/1000 ==========
+[RECIP 60] FORWARD 시작
+[INFO] [1778426106.729624084] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=60 | bpm=110.4
+[CPR 00:33] actual_bpm=107.0 | target=-7010 | pos=-7159 | error=149 | current=0.0REACHED
+[RECIP 60] BACKWARD 시작
+
+========== 왕복 61/1000 ==========
+[RECIP 61] FORWARD 시작
+[ROS COMPRESSION] count=61 | bpm=98.8
+[CPR 00:34] actual_bpm=106.9 | target=-7010 | pos=-7147 | error=137 | current=0.0REACHED
+[RECIP 61] BACKWARD 시작
+
+========== 왕복 62/1000 ==========
+[RECIP 62] FORWARD 시작
+[ROS COMPRESSION] count=62 | bpm=101.6
+[CPR 00:34] actual_bpm=106.8 | target=-7010 | pos=-7020 | error=10 | current=0.0REACHED
+[RECIP 62] BACKWARD 시작
+[WARN] [1778426108.246560290] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[INFO] [1778426108.406233927] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+
+========== 왕복 63/1000 ==========
+[RECIP 63] FORWARD 시작
+[ROS COMPRESSION] count=63 | bpm=107.3
+[CPR 00:35] actual_bpm=106.8 | target=-7010 | pos=-8450 | error=1440 | current=0.0REACHED
+[RECIP 63] BACKWARD 시작
+[WARN] [1778426108.805029257] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426108.837192822] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+
+========== 왕복 64/1000 ==========
+[RECIP 64] FORWARD 시작
+[INFO] [1778426109.076548217] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778426109.109445913] [motor_ros_bridge]: [LOADCELL] warning cleared
+[ROS COMPRESSION] count=64 | bpm=107.2
+[CPR 00:35] actual_bpm=106.8 | target=-7010 | pos=-7158 | error=148 | current=0.0REACHED
+[RECIP 64] BACKWARD 시작
+
+========== 왕복 65/1000 ==========
+[RECIP 65] FORWARD 시작
+[ROS COMPRESSION] count=65 | bpm=107.3
+[CPR 00:36] actual_bpm=106.8 | target=-7010 | pos=-8550 | error=1540 | current=0.0REACHED
+[RECIP 65] BACKWARD 시작
+[WARN] [1778426109.923593152] [motor_ros_bridge]: [LOADCELL] status_code=1 WARNING
+[WARN] [1778426109.956442815] [motor_ros_bridge]: [LOADCELL] 편심 경고: 압박봉 재정비 필요
+[ERROR] [1778426109.988463592] [motor_ros_bridge]: [MOTOR] stop command received
+
+[USER STOP] [STOP] 왕복 운동 중 사용자 정지 요청
+
+[USER STOP] 정지 요청: [STOP] 왕복 운동 중 사용자 정지 요청
+[USER STOP] INITIAL_POS=-163788로 복귀 후 Servo OFF
+[STOP]
+[ROS STATE] RETURNING_INITIAL
+[SETUP] PP 위치 모드 | 300 rpm
+[PP PARAM] speed=50000, accel=600000, decel=600000
+[SERVO ON]
+[USER STOP] 초기 위치 복귀 시작: -163788
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-56116 | error=107672 | current=8.4MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-69270 | error=94518 | current=7.2MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-81272 | error=82516 | current=9.0MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-95630 | error=68158 | current=9.9MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-107631 | error=56157 | current=8.200000000000001MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-121235 | error=42553 | current=10.8MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-134781 | error=29007 | current=9.1MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-146781 | error=17007 | current=8.4MOVING
+[CPR 00:00] actual_bpm=0.0 | target=-163788 | pos=-161147 | error=2641 | current=8.3REACHED
+[STOP]
+[SERVO OFF]
+[USER STOP] 초기 위치 복귀 후 Servo OFF 완료
+[ROS STATE] STOPPED
+
+[READY] 다시 /motor_start=True 를 기다립니다.
+[INFO] [1778426114.902821730] [motor_ros_bridge]: [LOADCELL] status_code=0 NORMAL
+[INFO] [1778426114.904823253] [motor_ros_bridge]: [LOADCELL] warning cleared
+^C
+[KEYBOARD INTERRUPT] 사용자 Ctrl+C 중단
