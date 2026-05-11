@@ -35,6 +35,7 @@ class ForceStats:
     warn_reasons: list[str] = field(default_factory=list)  # 경고 사유 목록
 
     # 오버로드 상태
+    overload_warn: bool = False   # 경고 임계값을 초과함
     overload_trip: bool = False   # 트립 임계값을 연속으로 초과함
     hard_stop:     bool = False   # 하드스탑 임계값을 즉시 초과함
 
@@ -54,21 +55,29 @@ def _compute_stats(
     warning      = False
     warn_reasons = []
 
-    if tilt_active:
-        share_ratio = imbalance / total
-        if share_ratio >= cfg.SHARE_WARN_THRESH:
+    if tilt_active and total > 0.0:
+        max_force = max(forces)
+        max_share = max_force / total
+
+        if max_share >= cfg.SHARE_WARN_THRESH:
             warning = True
-            warn_reasons.append(f"share>={cfg.SHARE_WARN_THRESH:.2f}")
+            warn_reasons.append(f"max_share={max_share:.2f}>={cfg.SHARE_WARN_THRESH:.2f}")
         if imbalance >= cfg.IMBALANCE_WARN_N:
             warning = True
             warn_reasons.append(f"imb>={cfg.IMBALANCE_WARN_N:.0f}N")
 
     # 채널별 오버로드 상태 집계
+    overload_warn = False
     overload_trip = False
     hard_stop     = False
+
     for state in channel_states.values():
-        if state["trip"]:      overload_trip = True
-        if state["hard_stop"]: hard_stop     = True
+        if state["warn"]:
+            overload_warn = True
+        if state["trip"]:
+            overload_trip = True
+        if state["hard_stop"]:
+            hard_stop = True
 
     return ForceStats(
         forces=forces,
@@ -77,6 +86,7 @@ def _compute_stats(
         tilt_active=tilt_active,
         warning=warning,
         warn_reasons=warn_reasons,
+        overload_warn=overload_warn,
         overload_trip=overload_trip,
         hard_stop=hard_stop,
     )
@@ -363,12 +373,14 @@ class LoadCellRosPublisher(Node):
     def _publish(self, stats: ForceStats) -> None:
         publishers = self._pubs
 
-        # 상태 코드: 0=정상 / 1=경고 / 2=트립 / 3=래치된 fault
+        # 편심 경고는 /loadcell_warning으로만 publish한다.
         if self._fault_latch:
             status_code = 3
-        elif stats.hard_stop or stats.overload_trip:
+        elif stats.hard_stop:
+            status_code = 3
+        elif stats.overload_trip:
             status_code = 2
-        elif stats.warning:
+        elif stats.overload_warn:
             status_code = 1
         else:
             status_code = 0
@@ -381,9 +393,9 @@ class LoadCellRosPublisher(Node):
             ("total", Float32(data=stats.total)),
             ("imb",   Float32(data=stats.imbalance)),
             ("tilt",  Bool(data=stats.tilt_active)),
-            ("warn",  Bool(data=stats.warning)),
-            ("stop",  Bool(data=self._stop_req)),
-            ("code",  Int32(data=status_code)),
+            ("warn",  Bool(data=stats.warning)),       # 편심 경고
+            ("stop",  Bool(data=self._stop_req)),      # 과하중 trip/hard_stop에서만 True
+            ("code",  Int32(data=status_code)),        # 과하중 상태만 표시
         ]:
             publishers[key].publish(message)
 

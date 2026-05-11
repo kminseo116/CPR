@@ -348,24 +348,37 @@ def print_motion_status(
     current_a,
     speed_rpm,
     reached=False,
-    cpr_start_time=None
+    cpr_start_time=None,
+    instant_bpm=None,
+    avg_bpm=None,
+    cycle_dt=None,
 ):
-    """왕복 운동 중 핵심 상태 출력"""
+    """모터 상태 출력. BPM 값은 motor_main.py에서 계산해 전달한다."""
     status = "REACHED" if reached else "MOVING"
 
     if cpr_start_time is not None:
         elapsed_sec = time.time() - cpr_start_time
         elapsed = format_elapsed_time(elapsed_sec)
-        actual_bpm = cycle / elapsed_sec * 60.0 if elapsed_sec > 0 else 0.0
     else:
         elapsed = "00:00"
-        actual_bpm = 0.0
+
+    bpm_str = ""
+    if instant_bpm is not None:
+        bpm_error = instant_bpm - cfg.TARGET_BPM
+        bpm_str += f"bpm={instant_bpm:.1f}({bpm_error:+.1f}) | "
+    if avg_bpm is not None:
+        bpm_str += f"avg={avg_bpm:.1f} | "
+    if cycle_dt is not None:
+        bpm_str += f"dt={cycle_dt:.3f}s | "
 
     print(
         f"[CPR {elapsed}] "
-        f"actual_bpm={actual_bpm:.1f} | "
-        f"target={target_pos} | pos={current_pos} | error={error} | current={current_a}"
-        f"{status}"
+        f"count={cycle} | "
+        f"{bpm_str}"
+        f"target={target_pos} | "
+        f"pos={current_pos} | "
+        f"error={error} | "
+        f"current={current_a:.3f}A | "
     )
 
 

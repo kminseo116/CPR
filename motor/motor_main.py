@@ -213,9 +213,17 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
     ros.compression_bpm = 0.0
     ros.last_compression_time = None
 
-    # 왕복 루프 주기
-    # 값이 너무 크면 방향 전환이 늦어져 bpm이 떨어짐
+    # 왕복 루프 주기, 값이 너무 크면 방향 전환이 늦어져 bpm이 떨어짐
     LOOP_SLEEP_S = 0.001
+
+    # 안전검사는 loop_count 기준이 아니라 시간 기준으로 수행
+    SAFETY_CHECK_PERIOD_S = 0.5
+    last_safety_check_time = time.time()
+
+    # 전류는 매 루프마다 읽지 않고 1초마다만 갱신
+    CURRENT_READ_PERIOD_S = 1.0
+    last_current_read_time = 0.0
+    current_a = 0.0
 
     # 처음에는 압박 방향, 즉 end_pos 방향으로 이동
     target_pos = end_pos
@@ -223,10 +231,11 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
 
     # 첫 번째 왕복 로그 출력
     print(f"\n========== 왕복 {ros.compression_count + 1}/{cfg.REPEAT_COUNT} ==========")
-    print(f"[RECIP {ros.compression_count + 1}] FORWARD 시작")
 
     ros.publish_target_position(target_pos)
     drv.move_absolute_position(motor, target_pos)
+
+    forward_start_time = time.time()
 
     loop_count = 0
 
@@ -236,10 +245,13 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
         if ros.should_stop():
             raise UserStopRequested("[STOP] 왕복 운동 중 사용자 정지 요청")
 
-        # 매 루프마다 하지 말고 10번에 한 번만 확인
-        if loop_count % 10 == 0:
+        now_loop = time.time()
+
+        # 안전 검사 0.2초 마다
+        if now_loop - last_safety_check_time >= SAFETY_CHECK_PERIOD_S:
             drv.check_fault(motor)
             drv.check_current_safety(motor)
+            last_safety_check_time = now_loop
 
         current_pos = drv.read_current_position(motor)
 
@@ -249,12 +261,40 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
 
         error = abs(target_pos - current_pos)
 
-        # 목표 위치 근처에 들어오면 완전 정지까지 기다리지 않고 바로 반대 목표 지령
-        if error <= cfg.POSITION_TOLERANCE:
+        # FORWARD 방향에서만 BPM 안정화 시간 제한 적용
+        forward_elapsed = now_loop - forward_start_time if direction == "FORWARD" else 0.0
+
+        # 목표 위치 근처에 들어오거나, FORWARD 시간이 너무 길어지면 압박 완료 처리
+        if error <= cfg.POSITION_TOLERANCE or (
+            direction == "FORWARD" and forward_elapsed >= cfg.MAX_ALLOWED_CYCLE_DT
+        ):
 
             if direction == "FORWARD":
                 # 압박 끝 지점에 도달한 것으로 보고 압박 1회 카운트
-                ros.update_compression_count()
+                now = time.time()
+
+                ros.compression_count += 1
+
+                if ros.last_compression_time is None:
+                    cycle_dt = 0.0
+                    instant_bpm = 0.0
+                else:
+                    cycle_dt = now - ros.last_compression_time
+                    instant_bpm = 60.0 / cycle_dt if cycle_dt > 0 else 0.0
+
+                ros.last_compression_time = now
+
+                elapsed = now - cpr_start_time
+                avg_bpm = ros.compression_count * 60.0 / elapsed if elapsed > 0 else 0.0
+
+                ros.compression_bpm = instant_bpm
+
+                if now - last_current_read_time >= CURRENT_READ_PERIOD_S:
+                    try:
+                        current_a = drv.read_current_a(motor)
+                    except Exception as e:
+                        print(f"[WARN] current read failed: {e}")
+                    last_current_read_time = now
 
                 drv.print_motion_status(
                     cycle=ros.compression_count,
@@ -262,11 +302,15 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
                     target_pos=target_pos,
                     current_pos=current_pos,
                     error=error,
-                    current_a=0.0,
+                    current_a=current_a,
                     speed_rpm=cfg.RECIP_RPM,
                     reached=True,
-                    cpr_start_time=cpr_start_time
+                    cpr_start_time=cpr_start_time,
+                    instant_bpm=instant_bpm,            # 실제 왕복 시간
+                    avg_bpm=avg_bpm,                    # 평균 bpm
+                    cycle_dt=cycle_dt,                  # 압박 1회 시간
                 )
+
 
                 # 목표 횟수 완료 시 종료
                 if ros.compression_count >= cfg.REPEAT_COUNT:
@@ -276,7 +320,7 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
                 target_pos = start_pos
                 direction = "BACKWARD"
 
-                print(f"[RECIP {ros.compression_count}] BACKWARD 시작")
+                # print(f"[RECIP {ros.compression_count}] BACKWARD 시작")
 
                 ros.publish_target_position(target_pos)
                 drv.move_absolute_position(motor, target_pos)
@@ -289,10 +333,11 @@ def reciprocating_motion(motor, ros, start_pos, end_pos, depth_cm):
                 direction = "FORWARD"
 
                 print(f"\n========== 왕복 {next_cycle}/{cfg.REPEAT_COUNT} ==========")
-                print(f"[RECIP {next_cycle}] FORWARD 시작")
 
                 ros.publish_target_position(target_pos)
                 drv.move_absolute_position(motor, target_pos)
+
+                forward_start_time = time.time()
 
         time.sleep(LOOP_SLEEP_S)
 

@@ -12,16 +12,40 @@ INITIAL_MOVE_RPM = 300
 SEARCH_RPM = 200
 
 # 왕복 속도 (rpm) // 목표 압박 bpm: 117bpm -> 모터는 2106rpm (1bpm = 18rpm)
-RECIP_RPM = 3000 #[rpm]
+RECIP_RPM = 2800 #[rpm]
 
 # 접촉 힘 기준
-CONTACT_FORCE_N = 5.0
+CONTACT_FORCE_N = 3.0
 
 # 전류 제한
-MAX_CURRENT_A = 150.0 #[A]
+MAX_CURRENT_A = 130.0 #[A]
 
 # 위치 이동 제한 시간 (초) -> 일단 길게 잡음
 MOVE_TIMEOUT = 30.0
+
+# ============================================================
+# BPM 안정화 설정
+# ============================================================
+
+TARGET_BPM = 107.0
+BPM_TOLERANCE = 3.0
+
+# 허용 BPM 범위
+MIN_ALLOWED_BPM = TARGET_BPM - BPM_TOLERANCE   # 104 bpm
+MAX_ALLOWED_BPM = TARGET_BPM + BPM_TOLERANCE   # 110 bpm
+
+# 목표 cycle time
+TARGET_CYCLE_DT = 60.0 / TARGET_BPM            # 약 0.561 s
+
+# 이론상 허용 cycle time 범위
+THEORY_MIN_ALLOWED_CYCLE_DT = 60.0 / MAX_ALLOWED_BPM  # 약 0.545 s
+THEORY_MAX_ALLOWED_CYCLE_DT = 60.0 / MIN_ALLOWED_BPM  # 약 0.577 s
+
+# 실제 제어용 cycle time 제한값
+# 너무 빠른 압박 방지: 0.548초 전에는 count 처리하지 않음
+# 너무 느린 압박 방지: 0.570초가 지나면 더 기다리지 않음
+MIN_ALLOWED_CYCLE_DT = 0.548
+MAX_ALLOWED_CYCLE_DT = 0.560
 
 # ============================================================
 # 로그 설정
@@ -124,7 +148,7 @@ CURRENT_SCALE = 0.1
 CURRENT_TRIP_COUNT_LIMIT = 5
 
 # 위치 도달 허용 오차 (지령단위)
-POSITION_TOLERANCE = 3000
+POSITION_TOLERANCE = 2500
 
 # 하드웨어 리미트 유지 여부
 KEEP_HARDWARE_LIMITS = True

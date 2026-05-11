@@ -21,26 +21,27 @@ ZERO_CAL_SAMPLE_HZ   = 100
 ZERO_CAL_MIN_SAMPLES = 15
 
 # ── 편심 경보 ─────────────────────────────────────────────────
-TILT_MIN_FORCE_N  = 100.0    # 전체 힘이 ?N 이상일 때만 편심 판단
-SHARE_WARN_THRESH = 0.70    # 한 로드셀이 전체 힘의 70% 이상 받을 때 편심 경고
-IMBALANCE_WARN_N  = 200.0   # 로드셀 간 차이가 ?N 이상일 때 편심 경고
+TILT_MIN_FORCE_N  = 200.0    # 전체 힘이 ?N 이상일 때만 편심 판단
+SHARE_WARN_THRESH = 0.80    # 한 로드셀이 전체 힘의 80% 이상 받을 때 편심 경고
+IMBALANCE_WARN_N  = 300.0   # 로드셀 간 차이가 ?N 이상일 때 편심 경고
 # 값 조정 필요
 
 # ── 오버로드 임계값 ───────────────────────────────────────────
 # CPR 마네킹 테스트용: 실제 압박 힘 기준 [N]
-OL_WARN_N = 1000.0    # 경고: 압박 힘이 높음
+# status_code:
+# 0 = NORMAL
+# 1 = OVERLOAD_WARNING
+# 2 = OVERLOAD_TRIP
+# 3 = OVERLOAD_HARD_STOP 또는 LATCH
+OL_WARN_N = 800.0    # 경고: 압박 힘이 높음
 OL_TRIP_N = 1000.0    # 트립: 모터 정지 요청
-OL_STOP_N = 1000.0    # 하드스탑: 즉시 정지 요청
-# 값 조정 필요
+OL_STOP_N = 1100.0    # 하드스탑: 즉시 정지 요청
 
-# OL_WARN_N   = RATED_FORCE_N * OL_WARN_RATIO
-# OL_TRIP_N   = RATED_FORCE_N * OL_TRIP_RATIO
-# OL_STOP_N   = RATED_FORCE_N * OL_STOP_RATIO
-OL_CONFIRM  = 3
+OL_CONFIRM  = 5
 
 # ── peak 값 측정 설정 ─────────────────────────────────────────────────
-COMPRESS_START_N = 5.0   # 이 값 이상이면 압박 시작으로 판단
-COMPRESS_END_N   = 3.0   # 이 값 이하로 내려오면 압박 종료로 판단
+COMPRESS_START_N = 120.0   # 이 값 이상이면 압박 시작으로 판단
+COMPRESS_END_N   = 90.0   # 이 값 이하로 내려오면 압박 종료로 판단
 
 # ── 주기 ──────────────────────────────────────────────────────
 PRINT_PERIOD_S   = 0.1      # 화면에 보이는 속도
