@@ -3,7 +3,7 @@
 import time
 import rclpy
 from rclpy.node import Node
-from std_msgs.msg import Bool, Float32, Int32, String
+from std_msgs.msg import Bool, Float32, Int32, String, Float32MultiArray
 
 
 class MotorRosBridge(Node):
@@ -30,11 +30,11 @@ class MotorRosBridge(Node):
         # PUB 상태값
         # =========================
         self.motor_state = "IDLE"
-        self.contact_position = 0
-        self.target_position = 0
 
         self.compression_count = 0
         self.compression_bpm = 0.0
+        self.compression_time_s = 0.0
+        self.compression_depth_cm = 0.0
         self.cpr_start_time = None
         self.last_compression_time = None
 
@@ -42,11 +42,10 @@ class MotorRosBridge(Node):
         # Publisher
         # =========================
         self.pub_abs_pos = self.create_publisher(Int32, "/motor_absolute_position", 10)     # 모터 절대 위치값(P0B-07)
-        self.pub_contact_pos = self.create_publisher(Int32, "/motor_contact_position", 10)  # 로드셀 접촉 순간 저장한 위치값
-        self.pub_target_pos = self.create_publisher(Int32, "/motor_target_position", 10)    # 목표 위치값
-        self.pub_count = self.create_publisher(Int32, "/motor_compression_count", 10)       # 압박 횟수
-        self.pub_bpm = self.create_publisher(Float32, "/motor_compression_bpm", 10)         # 압박 속도[bpm]
-        self.pub_time = self.create_publisher(Float32, "/motor_compression_time", 10)       # 압박 진행 시간[초]
+
+        # 압박 횟수, bpm, 시간, 깊이 묶어서 발행
+        self.pub_compression_status = self.create_publisher(Float32MultiArray, "/motor_compression_status",10)
+
         self.pub_current_a = self.create_publisher(Float32, "/motor_current_a", 10)         # 모터 전류값[A], P0B-24 기준
         self.pub_state = self.create_publisher(String, "/motor_state", 10)                  # 모터 상태(IDLE, SEARCHING, RECIPROCATING, STOPPED 등)
 
@@ -155,41 +154,72 @@ class MotorRosBridge(Node):
     def publish_current_a(self, current_a):
         self.pub_current_a.publish(Float32(data=float(current_a)))
 
-    def publish_target_position(self, target_pos):
-        self.target_position = int(target_pos)
-        self.pub_target_pos.publish(Int32(data=int(target_pos)))
+    def publish_compression_status(self, depth_cm=None):
+        """
+        /motor_compression_status
 
-    def publish_contact_position(self, contact_pos):
-        self.contact_position = int(contact_pos)
-        self.pub_contact_pos.publish(Int32(data=int(contact_pos)))
+        data[0] = compression_count
+        data[1] = compression_bpm
+        data[2] = compression_time_s
+        data[3] = compression_depth_cm
+        """
 
-    def publish_compression_time(self):
+        # 1. 시간 갱신
         if self.cpr_start_time is None:
-            elapsed = 0.0
+            self.compression_time_s = 0.0
         else:
-            elapsed = time.time() - self.cpr_start_time
+            self.compression_time_s = time.time() - self.cpr_start_time
 
-        self.pub_time.publish(Float32(data=float(elapsed)))
+        # 2. 깊이 갱신
+        if depth_cm is not None:
+            self.compression_depth_cm = float(depth_cm)
 
-    def update_compression_count(self):
+        # 3. 통합 발행
+        msg = Float32MultiArray()
+        msg.data = [
+            float(self.compression_count),
+            float(self.compression_bpm),
+            float(self.compression_time_s),
+            float(self.compression_depth_cm),
+        ]
+
+        self.pub_compression_status.publish(msg)
+
+    def update_compression_count(self, bpm=None, depth_cm=None):
         """
         왕복 1회 = 압박 1회
+        bpm을 넘기면 해당 bpm을 사용.
+        depth_cm을 넘기면 현재 압박 깊이도 같이 갱신.
         """
         now = time.time()
 
         self.compression_count += 1
 
-        if self.last_compression_time is not None:
-            dt = now - self.last_compression_time
-            if dt > 0:
-                self.compression_bpm = 60.0 / dt
+        if bpm is None:
+            if self.last_compression_time is not None:
+                dt = now - self.last_compression_time
+                if dt > 0:
+                    self.compression_bpm = 60.0 / dt
+        else:
+            self.compression_bpm = float(bpm)
 
         self.last_compression_time = now
 
-        self.pub_count.publish(Int32(data=int(self.compression_count)))
-        self.pub_bpm.publish(Float32(data=float(self.compression_bpm)))
+        self.publish_compression_status(depth_cm=depth_cm)
 
         print(
             f"[ROS COMPRESSION] count={self.compression_count} | "
-            f"bpm={self.compression_bpm:.1f}"
+            f"bpm={self.compression_bpm:.1f} | "
+            f"time={self.compression_time_s:.2f}s | "
+            f"depth={self.compression_depth_cm:.2f}cm"
         )
+
+    def reset_compression_status(self):
+        self.compression_count = 0
+        self.compression_bpm = 0.0
+        self.compression_time_s = 0.0
+        self.compression_depth_cm = 0.0
+        self.cpr_start_time = time.time()
+        self.last_compression_time = None
+
+        self.publish_compression_status(depth_cm=0.0)
