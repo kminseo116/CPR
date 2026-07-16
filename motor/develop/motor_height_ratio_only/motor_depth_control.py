@@ -80,29 +80,66 @@ def estimate_chest_height_mm(initial_pos, contact_pos):
 
 def calculate_initial_depth_mm(chest_height_mm):
     """
-    흉부 높이 비율 기반 초기 압박 깊이 계산.
+    흉부 높이 기반 초기 압박 깊이 계산.
 
-    계산식:
-        raw_depth_mm = chest_height_mm × CHEST_HEIGHT_DEPTH_RATIO
+    기준:
+    - LOW_CHEST_HEIGHT_MM 이하이면 MIN_COMPRESSION_DEPTH_MM 적용
+    - HIGH_CHEST_HEIGHT_MM 이상이면 MAX_COMPRESSION_DEPTH_MM 적용
+    - 그 사이에서는 선형 보간으로 50~60 mm 사이 깊이 계산
 
-    적용 방식:
-    - 흉부 높이가 낮으면 5 cm에 가깝게 압박
-    - 흉부 높이가 높으면 6 cm에 가깝게 압박
-    - 최종 목표 깊이는 성인 CPR 기준 범위인 50~60 mm로 제한
+    예:
+    LOW_CHEST_HEIGHT_MM = 140 mm
+    HIGH_CHEST_HEIGHT_MM = 200 mm
+    MIN_COMPRESSION_DEPTH_MM = 50 mm
+    MAX_COMPRESSION_DEPTH_MM = 60 mm
+
+    chest_height 140 mm -> depth 50.0 mm
+    chest_height 160 mm -> depth 53.3 mm
+    chest_height 180 mm -> depth 56.7 mm
+    chest_height 200 mm -> depth 60.0 mm
     """
-    raw_depth_mm = float(chest_height_mm) * float(cfg.CHEST_HEIGHT_DEPTH_RATIO)
+    chest_height_mm = float(chest_height_mm)
+
+    low_h = float(cfg.LOW_CHEST_HEIGHT_MM)
+    high_h = float(cfg.HIGH_CHEST_HEIGHT_MM)
+
+    min_depth = float(cfg.MIN_COMPRESSION_DEPTH_MM)
+    max_depth = float(cfg.MAX_COMPRESSION_DEPTH_MM)
+
+    if high_h <= low_h:
+        print(
+            f"[WARN] 흉부 높이 매핑 기준 오류: "
+            f"LOW={low_h:.1f}, HIGH={high_h:.1f}. "
+            f"기본 최소 깊이 {min_depth:.1f} mm 사용"
+        )
+        return min_depth
+
+    if chest_height_mm <= low_h:
+        target_depth_mm = min_depth
+        region = "LOW_CHEST_MIN_DEPTH"
+
+    elif chest_height_mm >= high_h:
+        target_depth_mm = max_depth
+        region = "HIGH_CHEST_MAX_DEPTH"
+
+    else:
+        ratio = (chest_height_mm - low_h) / (high_h - low_h)
+        target_depth_mm = min_depth + ratio * (max_depth - min_depth)
+        region = "LINEAR_MAPPING"
 
     target_depth_mm = clamp(
-        raw_depth_mm,
+        target_depth_mm,
         cfg.MIN_COMPRESSION_DEPTH_MM,
         cfg.MAX_COMPRESSION_DEPTH_MM,
     )
 
     print(
-        f"[DEPTH CALC] chest_height={chest_height_mm:.1f} mm | "
-        f"ratio={cfg.CHEST_HEIGHT_DEPTH_RATIO:.3f} | "
-        f"raw_depth={raw_depth_mm:.1f} mm | "
-        f"target_depth={target_depth_mm:.1f} mm"
+        f"[DEPTH MAP] chest_height={chest_height_mm:.1f} mm | "
+        f"height_range={low_h:.1f}~{high_h:.1f} mm | "
+        f"depth_range={min_depth:.1f}~{max_depth:.1f} mm | "
+        f"target_depth={target_depth_mm:.1f} mm "
+        f"({target_depth_mm / 10.0:.1f} cm) | "
+        f"region={region}"
     )
 
     return target_depth_mm

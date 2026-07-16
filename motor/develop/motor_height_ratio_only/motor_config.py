@@ -125,7 +125,7 @@ DEFAULT_TRAVEL_UNITS = int(DEFAULT_TRAVEL_MOTOR_REV * COMMAND_UNITS_PER_MOTOR_RE
 MOVE_TO_INITIAL_ON_START = True
 
 # 초기 위치 -> 전원 재연결 후 복귀할 위쪽 안전 기준 위치
-INITIAL_POS = 1955
+INITIAL_POS = 49147
 
 # 가감속 계수
 ACCEL_FACTOR = 12
@@ -142,7 +142,7 @@ REPEAT_COUNT = 1000
 # ============================================================
 
 # 받침면/등판면으로부터 초기 위치 상태의 압박봉 끝단까지의 높이 [mm]
-INITIAL_PLATE_HEIGHT_FROM_SUPPORT_MM = 255.0
+INITIAL_PLATE_HEIGHT_FROM_SUPPORT_MM = 235.0
 
 # 계산된 흉부 높이의 유효 범위 [mm] -> 비정상적인 흉부 높이가 계산되는 것을 방지 범위
 MIN_VALID_CHEST_HEIGHT_MM = 100.0
@@ -150,29 +150,31 @@ MAX_VALID_CHEST_HEIGHT_MM = 350.0
 
 
 # ============================================================
-# 흉부 높이 비율 기반 자동 압박 깊이 설정
+# 자동 압박 깊이 보정 설정
 # ============================================================
 
 # True이면 접촉 위치 기반 흉부 높이 추정으로 압박 깊이를 자동 계산
 USE_AUTO_COMPRESSION_DEPTH = True
 
-# 흉부 높이에 곱할 압박 깊이 비율
-# 예: chest_height=200 mm, ratio=0.25 → target_depth=50 mm
-#     chest_height=240 mm, ratio=0.25 → target_depth=60 mm
-CHEST_HEIGHT_DEPTH_RATIO = 0.25
-
 # 성인 CPR 압박 깊이 제한 범위 [mm]
-# 흉부 높이 비율로 계산된 깊이를 최종적으로 50~60 mm 안으로 제한한다.
+# 최종 목표 깊이는 항상 이 범위 안으로 제한한다.
 MIN_COMPRESSION_DEPTH_MM = 50.0
 MAX_COMPRESSION_DEPTH_MM = 60.0
 
-# 자동 깊이 계산 실패 또는 수동 모드에서 사용할 기본 압박 깊이 [mm]
-BASE_COMPRESSION_DEPTH_MM = 50.0
+# ============================================================
+# 흉부 높이 기반 압박 깊이 매핑 설정
+# ============================================================
+
+# 현재 우리의 마네킹 흉부 높이 약 160 mm 기준
+# 낮은 흉부 기준: 140 mm 이하 → 50 mm 압박
+# 높은 흉부 기준: 200 mm 이상 → 60 mm 압박
+# 140~200 mm 사이는 선형 보간으로 50~60 mm 사이 깊이를 계산한다.
+LOW_CHEST_HEIGHT_MM = 140.0
+HIGH_CHEST_HEIGHT_MM = 200.0
 
 # recoil 확인 기준 [N]
 # BACKWARD 복귀 후에도 로드셀 합산 힘이 이 값보다 크면 recoil 부족 가능성 경고
 RECOIL_FORCE_THRESHOLD_N = 30.0
-
 
 # ============================================================
 # 압박 깊이 수동 입력 설정

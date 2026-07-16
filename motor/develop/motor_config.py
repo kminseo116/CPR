@@ -70,7 +70,7 @@ LOG_PERIOD_S = 0.2
 # 통신 설정
 # ============================================================
 
-PORT = "/dev/motor_rs485"
+PORT     = "/dev/ttyUSB0"
 SLAVE_ID = 1
 
 BAUDRATE = 19200
@@ -157,14 +157,21 @@ MAX_VALID_CHEST_HEIGHT_MM = 350.0
 # True이면 접촉 위치 기반 흉부 높이 추정으로 압박 깊이를 자동 계산
 USE_AUTO_COMPRESSION_DEPTH = True
 
-# 기본 목표 압박 깊이 [mm]
-# 성인 CPR 최소 권장 깊이인 5 cm를 기본값으로 둔다.
-BASE_COMPRESSION_DEPTH_MM = 50.0
-
 # 성인 CPR 압박 깊이 제한 범위 [mm]
 # 최종 목표 깊이는 항상 이 범위 안으로 제한한다.
 MIN_COMPRESSION_DEPTH_MM = 50.0
 MAX_COMPRESSION_DEPTH_MM = 60.0
+
+# ============================================================
+# 흉부 높이 기반 압박 깊이 매핑 설정
+# ============================================================
+
+# 현재 우리의 마네킹 흉부 높이 약 160 mm 기준
+# 낮은 흉부 기준: 140 mm 이하 → 50 mm 압박
+# 높은 흉부 기준: 200 mm 이상 → 60 mm 압박
+# 140~200 mm 사이는 선형 보간으로 50~60 mm 사이 깊이를 계산한다.
+LOW_CHEST_HEIGHT_MM = 140.0
+HIGH_CHEST_HEIGHT_MM = 200.0
 
 # recoil 확인 기준 [N]
 # BACKWARD 복귀 후에도 로드셀 합산 힘이 이 값보다 크면 recoil 부족 가능성 경고

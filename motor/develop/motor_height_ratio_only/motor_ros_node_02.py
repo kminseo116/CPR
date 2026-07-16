@@ -16,12 +16,10 @@ class MotorRosBridge(Node):
         self.loadcell_total = 0.0
         self.loadcell_stop_request = False
         self.loadcell_status_code = 0
-        self.loadcell_warning = False
 
         # 이전 상태 저장용: 같은 로그 반복 출력 방지
         self.prev_loadcell_stop_request = False
         self.prev_loadcell_status_code = 0
-        self.prev_loadcell_warning = False
 
         self.motor_start = False
         self.motor_stop = False
@@ -57,7 +55,6 @@ class MotorRosBridge(Node):
         self.create_subscription(Float32, "/loadcell_total", self.cb_loadcell_total, 10)            # 로드셀 합산 힘[N], 접촉 감지 기준값   
         self.create_subscription(Bool, "/loadcell_stop_request", self.cb_loadcell_stop_request, 10) # 로드셀 기준 모터 정지 요청
         self.create_subscription(Int32, "/loadcell_status_code", self.cb_loadcell_status_code, 10)  # 로드셀 상태 코드, 0=정상 1=경고 2=트립 3=래치
-        self.create_subscription(Bool, "/loadcell_warning", self.cb_loadcell_warning, 10)           # 로드셀 편심 경고, 압박봉 재정비 필요
 
         self.create_subscription(Bool, "/motor_start", self.cb_motor_start, 10)                     # 모터 시작 명령, UI 시작 버튼에서 발행 예정
         self.create_subscription(Bool, "/motor_stop", self.cb_motor_stop, 10)                       # 모터 정지 명령, UI 정지 버튼에서 발행 예정
@@ -101,19 +98,6 @@ class MotorRosBridge(Node):
 
         self.loadcell_status_code = new_code
         self.prev_loadcell_status_code = new_code
-
-    def cb_loadcell_warning(self, msg):
-        new_value = bool(msg.data)
-
-        # 값이 바뀔 때만 로그 출력
-        if new_value != self.prev_loadcell_warning:
-            if new_value:
-                self.get_logger().warn("[LOADCELL] 편심 경고: 압박봉 재정비 필요")
-            else:
-                self.get_logger().info("[LOADCELL] warning cleared")
-
-        self.loadcell_warning = new_value
-        self.prev_loadcell_warning = new_value
 
     def cb_motor_start(self, msg):
         if msg.data:
