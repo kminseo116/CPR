@@ -1,0 +1,10 @@
+loadcell_single_main.py 
+
+/loadcell_stop_request=True 최초 발생 → 5초 뒤 영점 보정 시도
+/motor_stop=True 수신 → 5초 뒤 영점 보정 시도
+두 신호가 겹치면 → 먼저 들어온 신호의 예약 시간 사용
+
+loadcell_main.py 
+
+프로그램 시작 → 즉시 영점 보정
+/loadcell_reset=True → 지연 후 영점 보정

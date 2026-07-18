@@ -231,7 +231,6 @@ class LoadCellRosPublisher(Node):
         self._last_print = 0.0
 
         # 트립 또는 하드스탑 이후 정지 요청을 유지
-        self._fault_latch = False
         self._stop_req = False
 
         # 압박 1회 최대 힘 추적
@@ -287,7 +286,7 @@ class LoadCellRosPublisher(Node):
                 10,
             ),
 
-            # 0=정상, 1=경고, 2=트립, 3=정지 래치
+            # 0=정상, 1=경고, 2=트립, 3=하드스탑
             "code": self.create_publisher(
                 Int32,
                 "/loadcell_status_code",
@@ -333,6 +332,22 @@ class LoadCellRosPublisher(Node):
             self._compressing = False
             self._current_peak_force = 0.0
 
+    def _schedule_zero_calibration(self, reason: str) -> None:
+        """5초 뒤 영점 보정을 한 번 예약한다."""
+
+        # 이미 예약되어 있으면 기존 예약 유지
+        if self._zero_pending:
+            return
+
+        self._zero_pending = True
+        self._zero_request_time = time.time()
+
+        self.get_logger().info(
+            f"{reason}. "
+            f"Zero calibration scheduled after "
+            f"{cfg.ZERO_DELAY_AFTER_MOTOR_STOP_S:.1f} s."
+        )
+
     # ── /motor_stop 콜백 ──────────────────────────────────────
     def _motor_stop_callback(self, msg: Bool) -> None:
         """
@@ -345,7 +360,6 @@ class LoadCellRosPublisher(Node):
             return
 
         # 과부하 상태와 정지 요청 초기화
-        self._fault_latch = False
         self._stop_req = False
         self._channel.reset_fault()
 
@@ -353,7 +367,7 @@ class LoadCellRosPublisher(Node):
         self._compressing = False
         self._current_peak_force = 0.0
 
-        # 영점 보정 예약
+        # 사용자 정지 시점부터 5초 뒤 영점 보정
         self._zero_pending = True
         self._zero_request_time = time.time()
 
@@ -380,7 +394,7 @@ class LoadCellRosPublisher(Node):
         # 같은 요청에 대해 반복 수행하지 않도록 먼저 False 처리
         self._zero_pending = False
 
-        # 아직 로드셀에 힘이 걸려 있으면 영점 보정하지 않음
+        # 아직 로드셀에 힘이 걸려 있으면 영점 보정하지 않음  -> 주의 다시 수정 필요할 수도
         if abs(force_n) > cfg.ZERO_SAFE_FORCE_N:
             self.get_logger().warn(
                 f"Delayed zero calibration skipped. "
@@ -399,8 +413,13 @@ class LoadCellRosPublisher(Node):
         self._compressing = False
         self._current_peak_force = 0.0
 
+        # 영점 보정 성공 후 정지 요청과 과부하 상태 해제
+        self._stop_req = False
+        self._channel.reset_fault()
+
         self.get_logger().info(
-            "Delayed loadcell zero calibration completed."
+            "Delayed loadcell zero calibration completed. "
+            "/loadcell_stop_request=False"
         )
 
     # ── 상태 코드 ──────────────────────────────────────────────
@@ -413,10 +432,8 @@ class LoadCellRosPublisher(Node):
         0 = NORMAL
         1 = OVERLOAD_WARNING
         2 = OVERLOAD_TRIP
-        3 = HARD_STOP 또는 fault latch
+        3 = HARD_STOP
         """
-        if self._fault_latch:
-            return 3
 
         if state["hard_stop"]:
             return 3
@@ -448,10 +465,16 @@ class LoadCellRosPublisher(Node):
         # 과부하 상태 확인
         state = self._channel.get_state()
 
-        # 트립 또는 하드스탑 발생 시 정지 요청 래치
-        if state["trip"] or state["hard_stop"]:
-            self._fault_latch = True
+        # 트립 또는 하드스탑 발생 시 정지 요청 유지
+        stop_condition = state["trip"] or state["hard_stop"]
+
+        # 정지 요청이 처음 발생한 순간에만 영점 보정 예약
+        if stop_condition and not self._stop_req:
             self._stop_req = True
+
+            self._schedule_zero_calibration(
+                reason="/loadcell_stop_request=True triggered"
+            )
 
         status_code = self._get_status_code(state)
 
