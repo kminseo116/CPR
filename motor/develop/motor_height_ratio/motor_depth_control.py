@@ -122,37 +122,9 @@ def calculate_initial_depth_mm(chest_height_mm):
         target_depth_mm = min_depth + ratio * (max_depth - min_depth)
         region = "LINEAR_MAPPING"
 
-    # target_depth_mm = clamp(
-    #     target_depth_mm,
-    #     cfg.MIN_COMPRESSION_DEPTH_MM,
-    #     cfg.MAX_COMPRESSION_DEPTH_MM,
-    # )
-
-    # print(
-    #     f"[DEPTH MAP] chest_height={chest_height_mm:.1f} mm | "
-    #     f"height_range={low_h:.1f}~{high_h:.1f} mm | "
-    #     f"depth_range={min_depth:.1f}~{max_depth:.1f} mm | "
-    #     f"target_depth={target_depth_mm:.1f} mm "
-    #     f"({target_depth_mm / 10.0:.1f} cm) | "
-    #     f"region={region}"
-    # )
-
-    #test offset 적용
-    mapped_depth_mm = target_depth_mm
-
-    # 테스트용 offset 적용
-    # 예: DEPTH_TEST_OFFSET_MM = -15.0 이면 15 mm 덜 압박
-    offset_mm = float(getattr(cfg, "DEPTH_TEST_OFFSET_MM", 0.0))
-    target_depth_mm = mapped_depth_mm + offset_mm
-
-    # 테스트용 최소 깊이 사용
-    test_min_depth = float(
-        getattr(cfg, "TEST_MIN_COMPRESSION_DEPTH_MM", cfg.MIN_COMPRESSION_DEPTH_MM)
-    )
-
     target_depth_mm = clamp(
         target_depth_mm,
-        test_min_depth,
+        cfg.MIN_COMPRESSION_DEPTH_MM,
         cfg.MAX_COMPRESSION_DEPTH_MM,
     )
 
@@ -160,12 +132,40 @@ def calculate_initial_depth_mm(chest_height_mm):
         f"[DEPTH MAP] chest_height={chest_height_mm:.1f} mm | "
         f"height_range={low_h:.1f}~{high_h:.1f} mm | "
         f"depth_range={min_depth:.1f}~{max_depth:.1f} mm | "
-        f"mapped_depth={mapped_depth_mm:.1f} mm | "
-        f"offset={offset_mm:+.1f} mm | "
         f"target_depth={target_depth_mm:.1f} mm "
         f"({target_depth_mm / 10.0:.1f} cm) | "
         f"region={region}"
     )
+
+    # #test offset 적용
+    # mapped_depth_mm = target_depth_mm
+
+    # # 테스트용 offset 적용
+    # # 예: DEPTH_TEST_OFFSET_MM = -15.0 이면 15 mm 덜 압박
+    # offset_mm = float(getattr(cfg, "DEPTH_TEST_OFFSET_MM", 0.0))
+    # target_depth_mm = mapped_depth_mm + offset_mm
+
+    # # 테스트용 최소 깊이 사용
+    # test_min_depth = float(
+    #     getattr(cfg, "TEST_MIN_COMPRESSION_DEPTH_MM", cfg.MIN_COMPRESSION_DEPTH_MM)
+    # )
+
+    # target_depth_mm = clamp(
+    #     target_depth_mm,
+    #     test_min_depth,
+    #     cfg.MAX_COMPRESSION_DEPTH_MM,
+    # )
+
+    # print(
+    #     f"[DEPTH MAP] chest_height={chest_height_mm:.1f} mm | "
+    #     f"height_range={low_h:.1f}~{high_h:.1f} mm | "
+    #     f"depth_range={min_depth:.1f}~{max_depth:.1f} mm | "
+    #     f"mapped_depth={mapped_depth_mm:.1f} mm | "
+    #     f"offset={offset_mm:+.1f} mm | "
+    #     f"target_depth={target_depth_mm:.1f} mm "
+    #     f"({target_depth_mm / 10.0:.1f} cm) | "
+    #     f"region={region}"
+    # )
 
     return target_depth_mm
 

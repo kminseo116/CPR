@@ -210,7 +210,7 @@ def search_until_loadcell_contact(motor, ros):
         time.sleep(0.001)
 
 
-def reciprocating_motion(motor, ros, start_pos, initial_depth_mm):
+def reciprocating_motion(motor, ros, start_pos, initial_depth_mm, recip_rpm):
     """
     3단계: 접촉 위치를 기준으로 왕복 압박을 수행한다.
     """
@@ -222,7 +222,7 @@ def reciprocating_motion(motor, ros, start_pos, initial_depth_mm):
     print(f"[RECIP] START_POS = {start_pos}")
     print(f"[RECIP] INIT_END_POS = {end_pos}")
     print(f"[RECIP] 반복 횟수 = {cfg.REPEAT_COUNT}")
-    print(f"[RECIP] 왕복 속도 = {cfg.RECIP_RPM} rpm")
+    print(f"[RECIP] 왕복 속도 = {recip_rpm} rpm")
     print(f"[RECIP] 위치 도달 허용 오차 = {cfg.POSITION_TOLERANCE} unit")
 
     ros.publish_state("Compressing")
@@ -317,7 +317,7 @@ def reciprocating_motion(motor, ros, start_pos, initial_depth_mm):
                     current_pos=current_pos,
                     error=error,
                     current_a=current_a,
-                    speed_rpm=cfg.RECIP_RPM,
+                    speed_rpm=recip_rpm,
                     reached=True,
                     cpr_start_time=cpr_start_time,
                     instant_bpm=instant_bpm,
@@ -441,11 +441,29 @@ def run_sequence(motor, ros):
     drv.check_position_safety(start_pos, "start_pos")
     drv.check_position_safety(initial_end_pos, "initial_end_pos")
 
-    drv.setup_position_mode(motor, cfg.RECIP_RPM)
+    if getattr(cfg, "USE_DEPTH_BASED_RPM", False):
+        recip_rpm = int(
+            cfg.BASE_RECIP_RPM
+            * float(initial_depth_mm)
+            / float(cfg.BASE_DEPTH_FOR_RPM_MM)
+        )
+
+        recip_rpm = max(cfg.BASE_RECIP_RPM, recip_rpm)
+        recip_rpm = min(cfg.MAX_DEPTH_BASED_RPM, recip_rpm)
+
+        print(
+            f"[RPM MAP] depth={initial_depth_mm:.1f} mm | "
+            f"recip_rpm={recip_rpm} rpm"
+        )
+    else:
+        recip_rpm = cfg.RECIP_RPM
+
+    drv.setup_position_mode(motor, recip_rpm)
+
     drv.servo_on_by_forced_di(motor)
     drv.check_status(motor, "PP 왕복 Servo ON 후 상태")
 
-    reciprocating_motion(motor, ros, start_pos, initial_depth_mm)
+    reciprocating_motion(motor, ros, start_pos, initial_depth_mm, recip_rpm)
 
     drv.stop_motion(motor)
     time.sleep(0.3)
