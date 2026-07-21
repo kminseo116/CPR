@@ -71,7 +71,7 @@ LOG_PERIOD_S = 0.2
 
 PORT = "/dev/motor_rs485"
 SLAVE_ID = 1
-
+ 
 BAUDRATE = 19200
 BYTESIZE = 8
 PARITY = serial.PARITY_EVEN
@@ -110,7 +110,7 @@ MOTOR_UNITS_PER_MM = (
 # ============================================================
 
 # 자동 깊이를 사용하지 않을 때의 기본 압박 깊이 [mm]
-DEFAULT_TRAVEL_MM = 50.0
+DEFAULT_TRAVEL_MM = 40.0
 
 DEFAULT_TRAVEL_SCREW_REV = DEFAULT_TRAVEL_MM / SCREW_LEAD_MM_PER_REV
 DEFAULT_TRAVEL_MOTOR_REV = DEFAULT_TRAVEL_SCREW_REV * GEAR_MOTOR_REV_PER_SCREW_REV
@@ -142,9 +142,9 @@ REPEAT_COUNT = 1000
 # ============================================================
 
 # 받침면/등판면으로부터 초기 위치 상태의 압박봉 끝단까지의 높이 [mm]
-INITIAL_PLATE_HEIGHT_FROM_SUPPORT_MM = 235.0
+INITIAL_PLATE_HEIGHT_FROM_SUPPORT_MM = 255.0
 
-# 계산된 흉부 높이의 유효 범위 [mm] -> 비정상적인 흉부 높이가 계산되는 것을 방지 범위
+# 계산된 흉부 높이의 유효 범위 [mm] -> 비정상적인 흉부 높이가 계산되는 것을 방지 범위(최소 범위 확인 해봐야함)
 MIN_VALID_CHEST_HEIGHT_MM = 100.0
 MAX_VALID_CHEST_HEIGHT_MM = 350.0
 
@@ -162,6 +162,19 @@ MIN_COMPRESSION_DEPTH_MM = 50.0
 MAX_COMPRESSION_DEPTH_MM = 60.0
 
 # ============================================================
+# 테스트용 압박 깊이 보정값
+# ============================================================
+
+# 최종 계산된 목표 깊이에서 추가로 더하거나 빼는 값 [mm]
+# 예: -15.0이면 계산된 깊이보다 15 mm 덜 압박
+# 주의: 최종 발표/실사용 알고리즘에서는 0.0 권장
+DEPTH_TEST_OFFSET_MM = -15.0
+
+# 테스트 중 허용할 최소 깊이 [mm]
+# 5cm 기준을 깨고 테스트하려면 40.0 등으로 낮춰야 함
+TEST_MIN_COMPRESSION_DEPTH_MM = 35.0
+
+# ============================================================
 # 흉부 높이 기반 압박 깊이 매핑 설정
 # ============================================================
 
@@ -169,8 +182,8 @@ MAX_COMPRESSION_DEPTH_MM = 60.0
 # 낮은 흉부 기준: 140 mm 이하 → 50 mm 압박
 # 높은 흉부 기준: 200 mm 이상 → 60 mm 압박
 # 140~200 mm 사이는 선형 보간으로 50~60 mm 사이 깊이를 계산한다.
-LOW_CHEST_HEIGHT_MM = 140.0
-HIGH_CHEST_HEIGHT_MM = 200.0
+LOW_CHEST_HEIGHT_MM = 165.0
+HIGH_CHEST_HEIGHT_MM = 280.0
 
 # recoil 확인 기준 [N]
 # BACKWARD 복귀 후에도 로드셀 합산 힘이 이 값보다 크면 recoil 부족 가능성 경고
@@ -181,7 +194,7 @@ RECOIL_FORCE_THRESHOLD_N = 30.0
 # 자동 깊이를 끄는 경우에만 사용
 # ============================================================
 
-USE_INPUT_COMPRESSION_DEPTH = True
+USE_INPUT_COMPRESSION_DEPTH = False
 MAX_COMPRESSION_DEPTH_CM = 6.0
 
 

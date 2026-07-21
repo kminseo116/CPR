@@ -87,16 +87,11 @@ def calculate_initial_depth_mm(chest_height_mm):
     - HIGH_CHEST_HEIGHT_MM 이상이면 MAX_COMPRESSION_DEPTH_MM 적용
     - 그 사이에서는 선형 보간으로 50~60 mm 사이 깊이 계산
 
-    예:
-    LOW_CHEST_HEIGHT_MM = 140 mm
-    HIGH_CHEST_HEIGHT_MM = 200 mm
-    MIN_COMPRESSION_DEPTH_MM = 50 mm
-    MAX_COMPRESSION_DEPTH_MM = 60 mm
-
-    chest_height 140 mm -> depth 50.0 mm
-    chest_height 160 mm -> depth 53.3 mm
-    chest_height 180 mm -> depth 56.7 mm
-    chest_height 200 mm -> depth 60.0 mm
+    chest_height 135 mm -> depth 50.0 mm
+    chest_height 192 mm -> depth 52.3 mm
+    chest_height 214 mm -> depth 54.3 mm
+    chest_height 240 mm -> depth 56.7 mm
+    chest_height 280 mm -> depth 60.0 mm
     """
     chest_height_mm = float(chest_height_mm)
 
@@ -127,9 +122,37 @@ def calculate_initial_depth_mm(chest_height_mm):
         target_depth_mm = min_depth + ratio * (max_depth - min_depth)
         region = "LINEAR_MAPPING"
 
+    # target_depth_mm = clamp(
+    #     target_depth_mm,
+    #     cfg.MIN_COMPRESSION_DEPTH_MM,
+    #     cfg.MAX_COMPRESSION_DEPTH_MM,
+    # )
+
+    # print(
+    #     f"[DEPTH MAP] chest_height={chest_height_mm:.1f} mm | "
+    #     f"height_range={low_h:.1f}~{high_h:.1f} mm | "
+    #     f"depth_range={min_depth:.1f}~{max_depth:.1f} mm | "
+    #     f"target_depth={target_depth_mm:.1f} mm "
+    #     f"({target_depth_mm / 10.0:.1f} cm) | "
+    #     f"region={region}"
+    # )
+
+    #test offset 적용
+    mapped_depth_mm = target_depth_mm
+
+    # 테스트용 offset 적용
+    # 예: DEPTH_TEST_OFFSET_MM = -15.0 이면 15 mm 덜 압박
+    offset_mm = float(getattr(cfg, "DEPTH_TEST_OFFSET_MM", 0.0))
+    target_depth_mm = mapped_depth_mm + offset_mm
+
+    # 테스트용 최소 깊이 사용
+    test_min_depth = float(
+        getattr(cfg, "TEST_MIN_COMPRESSION_DEPTH_MM", cfg.MIN_COMPRESSION_DEPTH_MM)
+    )
+
     target_depth_mm = clamp(
         target_depth_mm,
-        cfg.MIN_COMPRESSION_DEPTH_MM,
+        test_min_depth,
         cfg.MAX_COMPRESSION_DEPTH_MM,
     )
 
@@ -137,6 +160,8 @@ def calculate_initial_depth_mm(chest_height_mm):
         f"[DEPTH MAP] chest_height={chest_height_mm:.1f} mm | "
         f"height_range={low_h:.1f}~{high_h:.1f} mm | "
         f"depth_range={min_depth:.1f}~{max_depth:.1f} mm | "
+        f"mapped_depth={mapped_depth_mm:.1f} mm | "
+        f"offset={offset_mm:+.1f} mm | "
         f"target_depth={target_depth_mm:.1f} mm "
         f"({target_depth_mm / 10.0:.1f} cm) | "
         f"region={region}"
