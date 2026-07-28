@@ -1,0 +1,10 @@
+rear_ackermann_node:
+  ros__parameters:
+    wheelbase_m: 1.075                  # 앞바퀴 축 중심과 뒷바퀴 축 중심 사이 거리: L(m)
+    rear_track_m: 0.336                 # 뒷바퀴 중심 사이거리, 후륜 윤거: T(m)
+    max_steering_deg: 60.0              # 실제 기구가 안전하게 낼 수 있는 최대 바퀴 조향각
+    linear_epsilon: 0.0001              # 이 값보다 작으면 속도는 0(엑셀)
+    angular_epsilon: 0.0001             # 이 값보다 작으면 직진으로 판단(직진/회전)
+
+    input_topic: /cmd_vel
+    output_topic: /rear_ackermann_cmd
