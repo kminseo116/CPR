@@ -113,8 +113,7 @@ class MotorRosBridge(Node):
             self.motor_start = True
 
     def _on_motor_stop(self, msg: Bool) -> None:
-        if msg.data:
-            self.motor_stop = True
+        self.motor_stop = bool(msg.data)
 
     # ======================================================================
     # 4. 입력 상태 확인
