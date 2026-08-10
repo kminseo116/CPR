@@ -173,7 +173,11 @@ class MotorDriver:
         return crc
 
     def write_i32(self, address: int, value: int) -> None:
-        """32비트 signed 값을 기능 코드 0x10으로 쓰고 다시 읽어 검증한다."""
+        """32비트 signed 값을 기능 코드 0x10으로 쓴다.
+
+        현재 장비는 표준 쓰기 응답 대신 요청 프레임을 그대로 에코한다.
+        명령 레지스터는 읽기 검증이 불가능하므로 에코의 일치 여부를 검사한다.
+        """
         words = self._i32_to_words(value)
 
         request_without_crc = struct.pack(
@@ -195,47 +199,36 @@ class MotorDriver:
         if not serial_port.is_open:
             serial_port.open()
 
-        last_error: Exception | None = None
+        if cfg.SHOW_MODBUS_DEBUG:
+            print(
+                f"[DWORD WRITE] address=0x{address:04X}, "
+                f"value={value}, words={words}"
+            )
 
-        for attempt in range(cfg.RETRIES + 1):
-            try:
-                serial_port.reset_input_buffer()
-                serial_port.reset_output_buffer()
+        serial_port.reset_input_buffer()
+        serial_port.reset_output_buffer()
+        serial_port.write(request)
+        serial_port.flush()
 
-                print(
-                    f"[DWORD WRITE] address=0x{address:04X}, "
-                    f"value={value}, words={words}, attempt={attempt + 1}"
-                )
+        echoed = serial_port.read(len(request))
+        if cfg.SHOW_MODBUS_DEBUG:
+            print(
+                "[DWORD ECHO] "
+                + " ".join(f"{byte:02X}" for byte in echoed)
+            )
 
-                serial_port.write(request)
-                serial_port.flush()
+        if echoed != request:
+            self.clear_buffers()
+            raise MotorError(
+                f"DWORD 요청 에코 불일치: address=0x{address:04X}, "
+                f"expected={request.hex(' ')}, actual={echoed.hex(' ')}"
+            )
 
-                time.sleep(0.05)
-                response = serial_port.read(serial_port.in_waiting or 8)
-                print(
-                    "[DWORD RESPONSE] "
-                    + " ".join(f"{byte:02X}" for byte in response)
-                )
-
-                time.sleep(0.05)
-                readback = self.read_i32(address)
-                print(f"[DWORD VERIFY] write={value}, read={readback}")
-
-                if readback != int(value):
-                    raise MotorError(
-                        f"DWORD 쓰기 검증 실패: address=0x{address:04X}, "
-                        f"write={value}, read={readback}"
-                    )
-
-                return
-            except Exception as exc:
-                last_error = exc
-                self.clear_buffers()
-                time.sleep(0.05)
-
-        raise MotorError(
-            f"DWORD 쓰기 0x{address:04X} 실패: {last_error}"
-        )
+        if cfg.SHOW_MODBUS_DEBUG:
+            print(
+                f"[DWORD WRITE ACCEPTED] address=0x{address:04X}, "
+                f"value={value}"
+            )
 
     def read_i32(self, address: int) -> int:
         words = self._retry(
@@ -258,23 +251,41 @@ class MotorDriver:
 
     def setup_runtime(self) -> None:
         """재기동 없이 적용 가능한 런타임 설정을 적용한다."""
+        # 이전 기동 명령이 남은 상태에서 Servo가 켜지지 않도록 먼저 정지한다.
+        self.write_u16(cfg.REG_MOTOR_START, 0)
         self.write_u16(cfg.REG_ENABLE_METHOD, 1)
+        self.write_u16(cfg.REG_INTERNAL_ENABLE, 0)
         self.write_u16(cfg.REG_POSITION_COMMAND_MODE, 0)
         self.write_u16(cfg.REG_ACCEL, cfg.ACCEL_FACTOR)
         self.write_u16(cfg.REG_DECEL, cfg.DECEL_FACTOR)
-        self.write_u16(
-            cfg.REG_MAX_SPEED,
-            min(cfg.COMPRESSION_SPEED_RPM, 50_000),
-        )
+        # 0x0010은 장비에서 40000으로 확인됐다. 일반 실행 때 사용자가
+        # 지정한 압박 속도로 덮어쓰지 않고 기존 하드웨어 상한을 유지한다.
 
         if cfg.SAVE_PARAMETERS_ON_SETUP:
             self.write_u16(cfg.REG_SAVE, 1)
 
     def enable(self) -> None:
         """내부 명령 방식으로 Servo ON."""
+        # Servo ON 전에 이동 시작 명령을 반드시 해제한다.
+        self.write_u16(cfg.REG_MOTOR_START, 0)
         self.write_u16(cfg.REG_ENABLE_METHOD, 1)
         self.write_u16(cfg.REG_INTERNAL_ENABLE, 1)
         time.sleep(0.1)
+
+        enable_method = self.read_u16(cfg.REG_ENABLE_METHOD)
+        internal_enable = self.read_u16(cfg.REG_INTERNAL_ENABLE)
+
+        print(
+            f"[SERVO ENABLE VERIFY] method={enable_method}, "
+            f"internal_enable={internal_enable}"
+        )
+
+        if enable_method != 1 or internal_enable != 1:
+            raise MotorError(
+                "내부 Servo ON 검증 실패: "
+                f"method={enable_method}, "
+                f"internal_enable={internal_enable}"
+            )
 
     def disable(self) -> None:
         """운동 정지 후 Servo OFF."""
@@ -301,17 +312,86 @@ class MotorDriver:
     # 4. 위치 이동 명령
     # ======================================================================
 
-    def set_speed(self, rpm: int) -> None:
-        """내부 속도를 매뉴얼 범위 0~3000 rpm으로 제한해 설정한다."""
-        limited_rpm = max(0, min(int(rpm), 3000))
-        self.write_u16(cfg.REG_INTERNAL_SPEED, limited_rpm)
+    @staticmethod
+    def output_rpm_to_speed_setting(output_rpm: float) -> int:
+        """원하는 실제 출력축 rpm을 모터 내부 속도 설정값으로 변환한다."""
+        output_rpm = float(output_rpm)
+        if output_rpm <= 0:
+            raise MotorError(f"출력축 속도는 0보다 커야 합니다: {output_rpm}")
 
-    def move_absolute(self, target_position: int, speed_rpm: int) -> None:
+        if output_rpm > cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM:
+            raise MotorError(
+                "요청한 출력축 속도가 현재 실제 검증 범위를 초과합니다: "
+                f"requested={output_rpm:.2f} rpm, "
+                f"verified_limit={cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM:.2f} rpm"
+            )
+
+        speed_setting = round(
+            output_rpm * cfg.SPEED_SETTING_PER_OUTPUT_RPM
+        )
+        if speed_setting > cfg.MAX_INTERNAL_SPEED_SETTING:
+            raise MotorError(
+                "요청한 출력축 속도가 현재 확인된 범위를 초과합니다: "
+                f"requested={output_rpm:.2f} rpm, "
+                f"max={cfg.MAX_OUTPUT_SPEED_RPM:.2f} rpm, "
+                f"setting={speed_setting}, "
+                f"setting_limit={cfg.MAX_INTERNAL_SPEED_SETTING}"
+            )
+        return speed_setting
+
+    def set_speed(self, speed_setting: int) -> None:
+        """모터 내부 속도 설정값을 확인된 범위 0~3000으로 기록한다."""
+        speed_setting = int(speed_setting)
+        if not 0 <= speed_setting <= cfg.MAX_INTERNAL_SPEED_SETTING:
+            raise MotorError(
+                "내부 속도 설정값 범위 초과: "
+                f"value={speed_setting}, "
+                f"limit={cfg.MAX_INTERNAL_SPEED_SETTING}"
+            )
+        self.write_u16(cfg.REG_INTERNAL_SPEED, speed_setting)
+
+    def move_absolute(self, target_position: int, speed_setting: int) -> None:
         """절대 위치 모드로 목표 위치 이동을 시작한다."""
         self.check_position_limit(target_position)
-        self.set_speed(speed_rpm)
+        self.stop()
+        self.set_speed(speed_setting)
         self.write_u16(cfg.REG_POSITION_COMMAND_MODE, 0)
         self.write_i32(cfg.REG_ABSOLUTE_POSITION, int(target_position))
+        self.write_u16(cfg.REG_MOTOR_START, 1)
+
+    def move_incremental(self, move_units: int, speed_setting: int) -> None:
+        """현재 위치를 기준으로 지정한 명령 단위만큼 이동을 시작한다."""
+        move_units = int(move_units)
+        self.check_position_limit(move_units)
+
+        # 직전 기동 상태를 해제해 새 이동 명령의 시작 에지를 만든다.
+        self.stop()
+        time.sleep(0.05)
+        self.set_speed(speed_setting)
+        self.write_u16(cfg.REG_POSITION_COMMAND_MODE, 1)
+        self.write_i32(cfg.REG_INCREMENT_POSITION, move_units)
+        time.sleep(0.05)
+        self.write_u16(cfg.REG_MOTOR_START, 1)
+
+    def prepare_incremental_motion(self, speed_setting: int) -> None:
+        """반복 증분 이동 전에 속도와 위치 명령 모드를 한 번만 설정한다."""
+        self.stop()
+        self.set_speed(speed_setting)
+        self.write_u16(cfg.REG_POSITION_COMMAND_MODE, 1)
+
+    def move_incremental_prepared(self, move_units: int) -> None:
+        """사전 설정된 속도·증분 모드로 최소 명령만 보내 이동한다.
+
+        CPR 왕복 전용 경로다. 매번 속도와 모드를 다시 쓰지 않고 기동
+        해제, 증분값, 기동 명령만 전송한다.
+        """
+        move_units = int(move_units)
+        self.check_position_limit(move_units)
+
+        self.stop()
+        time.sleep(cfg.CPR_COMMAND_EDGE_DELAY_S)
+        self.write_i32(cfg.REG_INCREMENT_POSITION, move_units)
+        time.sleep(cfg.CPR_COMMAND_EDGE_DELAY_S)
         self.write_u16(cfg.REG_MOTOR_START, 1)
 
     # ======================================================================

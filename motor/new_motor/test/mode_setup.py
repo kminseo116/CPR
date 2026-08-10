@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""RS485 서보모터 위치 제어 모드 확인 및 설정."""
+"""RS485 서보모터 제어 모드 확인 및 대화형 설정."""
 
 import minimalmodbus
 import serial
@@ -13,14 +13,6 @@ PORT = "/dev/ttyUSB0"
 SLAVE_ID = 1
 BAUDRATE = 115200
 
-# True:
-#   위치 모드가 아니면 위치 모드로 변경하고 저장
-#
-# False:
-#   현재 모드만 읽고 종료
-CHANGE_TO_POSITION_MODE = True
-
-
 # ============================================================
 # 레지스터
 # ============================================================
@@ -32,7 +24,23 @@ REG_MOTOR_START = 0x0023
 REG_SPEED_MODE_COMMAND = 0x002C
 REG_SAVE_DATA = 0x0030
 
-POSITION_MODE = 1
+MODE_NAMES = {
+    0: "외부 펄스 모드",
+    1: "RS485 위치 모드",
+    2: "RS485 속도 모드",
+    3: "외부 단자 속도 모드",
+    4: "RS485 토크 모드",
+    5: "외부 단자 토크 모드",
+}
+
+MODE_WARNINGS = {
+    0: "외부 펄스 배선과 펄스 입력에 따라 모터가 움직일 수 있습니다.",
+    1: "0x0042/0x0044 위치 명령과 0x0023 기동 명령을 사용합니다.",
+    2: "0x002C 속도 명령이 1 또는 2이면 연속 회전할 수 있습니다.",
+    3: "외부 방향·기동 단자의 전압에 따라 연속 회전할 수 있습니다.",
+    4: "RS485 토크 명령이 남아 있으면 큰 토크가 발생할 수 있습니다.",
+    5: "외부 토크·기동 단자의 전압에 따라 큰 토크가 발생할 수 있습니다.",
+}
 
 
 def create_motor() -> minimalmodbus.Instrument:
@@ -84,15 +92,56 @@ def write_register(
 
 
 def mode_name(mode: int) -> str:
-    names = {
-        0: "외부 펄스 모드",
-        1: "위치 모드",
-        2: "RS485 속도 모드",
-        3: "외부 단자 속도 모드",
-        4: "RS485 토크 모드",
-        5: "외부 단자 토크 모드",
-    }
-    return names.get(mode, "알 수 없는 모드")
+    return MODE_NAMES.get(mode, "알 수 없는 모드")
+
+
+def print_mode_menu() -> None:
+    """선택 가능한 제어 모드와 주의사항을 출력한다."""
+    print("\n[선택 가능한 제어 모드]")
+    for mode, name in MODE_NAMES.items():
+        print(f"  {mode}: {name}")
+
+
+def read_target_mode() -> int | None:
+    """사용자가 선택한 목표 모드를 반환하고 Enter면 None을 반환한다."""
+    print_mode_menu()
+    raw_value = input(
+        "\n변경할 모드 번호 입력 [0~5] "
+        "(Enter=현재 모드만 확인하고 종료): "
+    ).strip()
+
+    if not raw_value:
+        return None
+
+    try:
+        target_mode = int(raw_value)
+    except ValueError as exc:
+        raise ValueError("모드 번호는 0~5의 정수여야 합니다.") from exc
+
+    if target_mode not in MODE_NAMES:
+        raise ValueError(f"지원하지 않는 모드 번호입니다: {target_mode}")
+
+    return target_mode
+
+
+def confirm_mode_change(current_mode: int, target_mode: int) -> bool:
+    """비휘발성 설정 변경 전 정확한 확인 문구를 요구한다."""
+    print("\n====================================================")
+    print(" 제어 모드 변경 확인")
+    print("====================================================")
+    print(f"현재: {current_mode} ({mode_name(current_mode)})")
+    print(f"변경: {target_mode} ({mode_name(target_mode)})")
+    print(f"주의: {MODE_WARNINGS[target_mode]}")
+    print()
+    print("변경 과정에서 모터 정지 및 내부 Servo OFF 명령을 보냅니다.")
+    print("0x0030 저장 후 전원을 껐다 켜야 새 모드가 적용됩니다.")
+    print("외부 Enable 입력을 LOW로 만들고 모터 축의 하중을 제거하십시오.")
+
+    expected = f"SET {target_mode}"
+    confirmation = input(
+        f"변경하려면 '{expected}'을 정확히 입력하십시오: "
+    ).strip().upper()
+    return confirmation == expected
 
 
 def safely_stop_motor(
@@ -146,26 +195,29 @@ def main() -> None:
         print(f"0x0000 = {current_mode}")
         print(f"모드: {mode_name(current_mode)}")
 
-        if current_mode == POSITION_MODE:
-            print("\n이미 위치 제어 모드입니다.")
-            print("설정을 변경하지 않고 종료합니다.")
+        target_mode = read_target_mode()
+        if target_mode is None:
+            print("\n[완료] 현재 모드만 확인했고 설정을 변경하지 않았습니다.")
             return
 
-        if not CHANGE_TO_POSITION_MODE:
-            print("\nCHANGE_TO_POSITION_MODE=False")
-            print("현재 모드만 확인하고 종료합니다.")
+        if current_mode == target_mode:
+            print(
+                f"\n[변경 없음] 이미 {target_mode} "
+                f"({mode_name(target_mode)})입니다."
+            )
             return
 
-        print("\n위치 모드로 변경합니다.")
+        if not confirm_mode_change(current_mode, target_mode):
+            print("\n[취소] 확인 문구가 일치하지 않아 변경하지 않았습니다.")
+            return
 
         safely_stop_motor(motor)
 
-        # 제어 모드를 위치 모드로 설정
-        print("\n[위치 모드 설정]")
+        print("\n[제어 모드 설정]")
         write_register(
             motor,
             REG_CONTROL_MODE,
-            POSITION_MODE,
+            target_mode,
         )
 
         mode_after_write = read_register(
@@ -179,10 +231,10 @@ def main() -> None:
             f"({mode_name(mode_after_write)})"
         )
 
-        if mode_after_write != POSITION_MODE:
+        if mode_after_write != target_mode:
             raise RuntimeError(
-                "위치 모드 쓰기 검증 실패: "
-                f"읽은 값={mode_after_write}"
+                "제어 모드 쓰기 검증 실패: "
+                f"목표={target_mode}, 읽은 값={mode_after_write}"
             )
 
         # 비휘발성 저장
@@ -195,14 +247,22 @@ def main() -> None:
         print("0x0030 = 1 : 설정 저장 명령 완료")
 
         print("\n======================================")
-        print("위치 모드 설정 및 저장이 완료됐습니다.")
+        print(
+            f"{target_mode} ({mode_name(target_mode)}) "
+            "설정 및 저장이 완료됐습니다."
+        )
         print("이 설정은 전원을 다시 켜야 적용됩니다.")
         print()
         print("1. 모터 전원 OFF")
         print("2. 약 10초 대기")
         print("3. 모터 전원 ON")
-        print("4. 이 코드를 다시 실행")
-        print("5. 0x0000 = 1인지 확인")
+        print("4. 외부 Enable을 계속 LOW로 유지")
+        print("5. 이 코드를 다시 실행하고 Enter로 읽기만 수행")
+        print(
+            f"6. 0x0000 = {target_mode} "
+            f"({mode_name(target_mode)})인지 확인"
+        )
+        print(f"주의: {MODE_WARNINGS[target_mode]}")
         print("======================================")
 
     finally:
