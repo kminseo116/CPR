@@ -19,6 +19,7 @@ from pathlib import Path
 
 import motor_config as cfg
 from motor_driver import MotorDriver, MotorError, MotorStatus
+from motor_ros_node import MotorRosBridge
 
 
 MOVE_CONFIRM_COUNT = 3
