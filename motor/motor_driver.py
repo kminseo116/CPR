@@ -423,7 +423,7 @@ def wait_until_position_reached(
         if ros is not None:
             ros.publish_absolute_position(current_pos)
             ros.publish_current_a(current_a)
-            ros.publish_compression_time()
+            ros.publish_compression_status()
 
         error = abs(int(target_pos) - int(current_pos))
         now       = time.time()

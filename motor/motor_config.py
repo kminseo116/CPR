@@ -12,7 +12,7 @@ INITIAL_MOVE_RPM = 300
 SEARCH_RPM = 200
 
 # 왕복 속도 (rpm) // 목표 압박 bpm: 117bpm -> 모터는 2106rpm (1bpm = 18rpm)
-RECIP_RPM = 2800 #[rpm]
+RECIP_RPM = 2700 #[rpm]
 
 # 접촉 힘 기준
 CONTACT_FORCE_N = 3.0
@@ -102,7 +102,7 @@ MOVE_TO_INITIAL_ON_START = True
 
 # 초기 위치 (P0B-07 / P10-14 기준 지령단위)
 # 전원 재연결 후 복귀할 위쪽 안전 초기 위치
-INITIAL_POS = -3584
+INITIAL_POS = 5851
 
 # 가감속
 # * 4  → 목표 속도까지 약 0.25초
@@ -113,7 +113,7 @@ ACCEL_FACTOR = 12
 DECEL_FACTOR = 12
 
 # PV 탐색 중 허용 최대 속도 제한 (rpm)
-MAX_RPM_LIMIT = 2500
+MAX_RPM_LIMIT = 3000
 
 # 왕복 반복 횟수
 REPEAT_COUNT = 1000
