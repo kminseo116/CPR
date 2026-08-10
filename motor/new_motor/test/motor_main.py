@@ -123,11 +123,15 @@ def calculate_cpr_output_rpm(depth_cm: float) -> float:
         * cfg.TARGET_BPM
         * cfg.CPR_SPEED_MARGIN
     )
-    if required_rpm > cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM:
+    allowed_output_rpm = min(
+        cfg.MAX_OUTPUT_SPEED_RPM,
+        cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM,
+    )
+    if required_rpm > allowed_output_rpm:
         raise ValueError(
-            "요청 깊이와 BPM에 필요한 속도가 무부하 검증 범위를 초과합니다: "
+            "요청 깊이와 BPM에 필요한 속도가 허용 범위를 초과합니다: "
             f"required={required_rpm:.1f} rpm, "
-            f"verified={cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM:.1f} rpm"
+            f"allowed={allowed_output_rpm:.1f} rpm"
         )
     return required_rpm
 
@@ -203,15 +207,20 @@ def print_runtime_settings(initial_pos: int) -> None:
     print(f"[CURRENT] TEMP_LIMIT={cfg.MAX_CURRENT_RAW} raw")
 
 
-def check_alarm_status(status: MotorStatus) -> None:
-    if status.alarm == 0:
+def check_alarm_value(alarm: int) -> None:
+    """알람 비트값을 검사하고 해당 예외를 발생시킨다."""
+    if alarm == 0:
         return
 
-    alarm_names = MotorDriver.decode_alarm(status.alarm)
-    alarm_text = ", ".join(alarm_names) or f"0x{status.alarm:04X}"
-    if status.alarm & cfg.ALARM_OVERCURRENT:
+    alarm_names = MotorDriver.decode_alarm(alarm)
+    alarm_text = ", ".join(alarm_names) or f"0x{alarm:04X}"
+    if alarm & cfg.ALARM_OVERCURRENT:
         raise OvercurrentFault(f"과전류 알람 발생: {alarm_text}")
     raise MotorError(f"모터 알람 발생: {alarm_text}")
+
+
+def check_alarm_status(status: MotorStatus) -> None:
+    check_alarm_value(status.alarm)
 
 
 def update_software_current_trip(current_raw: int, count: int) -> int:
@@ -234,6 +243,7 @@ def move_incremental_and_wait(
     state_name: str,
     stop_on_contact_enter: bool = False,
     timeout_s: float | None = None,
+    allow_direction_change_grace: bool = False,
 ) -> MotorStatus:
     """증분 이동을 실행하고 실제 피드백 변화로 완료와 안전을 검사한다."""
     if command_units == 0 or expected_feedback_delta == 0:
@@ -328,10 +338,17 @@ def move_incremental_and_wait(
         ):
             movement_detected = True
 
-        if (
+        wrong_direction = (
             abs(feedback_delta) >= MIN_FEEDBACK_MOVEMENT
             and feedback_delta * expected_feedback_delta < 0
-        ):
+        )
+        within_direction_change_grace = (
+            allow_direction_change_grace
+            and elapsed <= cfg.CPR_DIRECTION_CHANGE_GRACE_S
+            and abs(feedback_delta)
+            <= cfg.CPR_DIRECTION_CHANGE_GRACE_COUNTS
+        )
+        if wrong_direction and not within_direction_change_grace:
             driver.stop()
             raise MotorError(
                 f"{state_name} 반대 방향 이동: "
@@ -390,23 +407,36 @@ def move_incremental_cpr_fast(
     expected_feedback_delta: int,
     output_rpm: float,
     state_name: str,
-) -> MotorStatus:
-    """CPR 왕복용 빠른 증분 이동과 위치 중심 완료 확인."""
+    start_position: int | None = None,
+    completion_tolerance_counts: int | None = None,
+) -> int:
+    """위치 도달 즉시 반환하여 다음 CPR 방향 명령을 빠르게 보낸다.
+
+    이 빠른 경로에서는 속도 0과 위치 오차를 기다리지 않는다. 알람,
+    전류, 위치 오차 등의 상세 상태는 왕복 한 사이클이 끝난 뒤 읽는다.
+    """
     if command_units == 0 or expected_feedback_delta == 0:
         raise ValueError("이동 명령과 예상 피드백은 0일 수 없습니다.")
+    if completion_tolerance_counts is None:
+        completion_tolerance_counts = cfg.POSITION_TOLERANCE_UNITS
+    completion_tolerance_counts = max(
+        cfg.POSITION_TOLERANCE_UNITS,
+        int(completion_tolerance_counts),
+    )
 
     timeout_s = calculate_move_timeout_s(
         expected_feedback_delta,
         output_rpm,
     )
-    feedback_overshoot_limit = max(
-        cfg.MIN_FEEDBACK_OVERSHOOT_COUNTS,
+    emergency_overshoot_limit = max(
+        cfg.CPR_MIN_EMERGENCY_OVERSHOOT_COUNTS,
         round(
             abs(expected_feedback_delta)
-            * cfg.MAX_FEEDBACK_OVERSHOOT_RATIO
+            * cfg.CPR_MAX_EMERGENCY_OVERSHOOT_RATIO
         ),
     )
-    start_position = driver.read_position()
+    if start_position is None:
+        start_position = driver.read_position()
     state_label = move_state_label(state_name)
     direction_name = (
         cfg.POSITIVE_DIRECTION_NAME
@@ -414,21 +444,16 @@ def move_incremental_cpr_fast(
         else cfg.NEGATIVE_DIRECTION_NAME
     )
     ros.publish_state(state_name)
-    print(f"\n[빠른 이동 시작] {state_label}")
     print(
-        f"  방향: {direction_name} | 목표: {output_rpm:.1f} rpm | "
-        f"피드백 변화량: {expected_feedback_delta:+d} count"
+        f"\n[이동 시작] {state_label} | 방향={direction_name} | "
+        f"속도={output_rpm:.1f} rpm"
     )
 
     command_time = time.monotonic()
     driver.move_incremental_prepared(command_units)
     movement_detected = False
-    current_trip_count = 0
-    reached_count = 0
-    last_safety_check_time = time.monotonic()
-    last_completion_check_time = command_time
-    last_log_time = command_time - cfg.MOVE_STATUS_LOG_PERIOD_S
-    last_status: MotorStatus | None = None
+    direction_change_wait_logged = False
+    last_log_time = command_time
 
     while True:
         ros.spin_once()
@@ -438,115 +463,95 @@ def move_incremental_cpr_fast(
 
         position = driver.read_position()
         now = time.monotonic()
+        elapsed_s = now - command_time
         feedback_delta = position - start_position
         abs_delta = abs(feedback_delta)
-
-        if abs_delta >= MIN_FEEDBACK_MOVEMENT:
-            movement_detected = True
+        moving_in_expected_direction = (
+            feedback_delta * expected_feedback_delta > 0
+        )
 
         if (
-            movement_detected
-            and feedback_delta * expected_feedback_delta < 0
+            abs_delta >= MIN_FEEDBACK_MOVEMENT
+            and moving_in_expected_direction
         ):
+            movement_detected = True
+
+        wrong_direction = feedback_delta * expected_feedback_delta < 0
+        initial_direction_change_inertia = (
+            wrong_direction
+            and not movement_detected
+            and abs_delta <= cfg.CPR_DIRECTION_CHANGE_GRACE_COUNTS
+        )
+        if wrong_direction and not initial_direction_change_inertia:
             driver.stop()
             raise MotorError(
                 f"{state_name} 반대 방향 이동: "
                 f"expected={expected_feedback_delta}, actual={feedback_delta}"
             )
+        if (
+            initial_direction_change_inertia
+            and not direction_change_wait_logged
+        ):
+            print(
+                f"[방향 전환 대기] {state_label} | "
+                f"기존 방향 관성={feedback_delta:+d} count"
+            )
+            direction_change_wait_logged = True
 
         if (
             abs_delta
-            > abs(expected_feedback_delta) + feedback_overshoot_limit
+            > abs(expected_feedback_delta) + emergency_overshoot_limit
         ):
             driver.stop()
             raise MotorError(
-                f"{state_name} 피드백 초과: "
+                f"{state_name} 비상 피드백 초과: "
                 f"expected={expected_feedback_delta}, actual={feedback_delta}, "
-                f"allowed_overshoot={feedback_overshoot_limit}"
+                f"emergency_overshoot={emergency_overshoot_limit}"
             )
 
-        near_target = (
+        reached = (
             movement_detected
             and abs_delta
-            >= abs(expected_feedback_delta) - cfg.POSITION_TOLERANCE_UNITS
-        )
-        safety_due = (
-            now - last_safety_check_time
-            >= cfg.CPR_SAFETY_STATUS_PERIOD_S
-        )
-        completion_due = (
-            near_target
-            and now - last_completion_check_time
-            >= cfg.CPR_COMMAND_EDGE_DELAY_S
+            >= abs(expected_feedback_delta) - completion_tolerance_counts
         )
 
-        if safety_due or completion_due:
-            status = driver.read_status()
-            status_time = time.monotonic()
-            last_status = status
-            last_safety_check_time = status_time
-            if completion_due:
-                last_completion_check_time = status_time
-
-            check_alarm_status(status)
-            current_trip_count = update_software_current_trip(
-                status.current_raw,
-                current_trip_count,
+        if now - last_log_time >= cfg.MOVE_STATUS_LOG_PERIOD_S:
+            progress_percent = min(
+                100.0,
+                abs_delta / abs(expected_feedback_delta) * 100.0,
             )
-            ros.publish_motor_status(status.position, status.current_raw)
-
-            feedback_delta = status.position - start_position
-            abs_delta = abs(feedback_delta)
-            if abs(status.position_error) > cfg.MAX_POSITION_ERROR_UNITS:
-                driver.stop()
-                raise MotorError(
-                    f"위치 편차 초과: error={status.position_error}, "
-                    f"limit={cfg.MAX_POSITION_ERROR_UNITS}"
-                )
-
-            if status_time - last_log_time >= cfg.MOVE_STATUS_LOG_PERIOD_S:
-                progress_percent = min(
-                    100.0,
-                    abs_delta / abs(expected_feedback_delta) * 100.0,
-                )
-                print(
-                    f"[빠른 진행] {state_label} | "
-                    f"{status_time - command_time:.3f}s | "
-                    f"{progress_percent:5.1f}% | 위치={status.position} | "
-                    f"속도={status.speed_rpm} | 전류={status.current_raw} | "
-                    f"오차={status.position_error}"
-                )
-                last_log_time = status_time
-
-            reached = (
-                movement_detected
-                and abs_delta
-                >= abs(expected_feedback_delta)
-                - cfg.POSITION_TOLERANCE_UNITS
-                and status.speed_rpm == 0
-                and abs(status.position_error)
-                <= cfg.POSITION_TOLERANCE_UNITS
+            print(
+                f"[이동 대기] {state_label} | "
+                f"{now - command_time:.3f}s | "
+                f"{progress_percent:5.1f}% | 위치={position} | "
+                f"위치차이={feedback_delta:+d} count"
             )
-            reached_count = reached_count + 1 if reached else 0
-            if reached_count >= cfg.CPR_FAST_CONFIRM_COUNT:
-                elapsed_s = status_time - command_time
-                print(
-                    f"[빠른 이동 완료] {state_label} | "
-                    f"시간={elapsed_s:.3f}s | "
-                    f"실제 변화량={feedback_delta} count | "
-                    f"최종 오차={status.position_error}"
-                )
-                return status
+            last_log_time = now
+
+        if reached:
+            target_difference = feedback_delta - expected_feedback_delta
+            average_rpm = (
+                abs(feedback_delta)
+                / cfg.FEEDBACK_COUNTS_PER_MOTOR_REV
+                * 60.0
+                / elapsed_s
+                if elapsed_s > 0.0
+                else 0.0
+            )
+            print(
+                f"[이동 완료] {state_label} | 방향={direction_name} | "
+                f"평균속도={average_rpm:.1f} rpm | 위치={position} | "
+                f"위치차이={feedback_delta:+d} count | "
+                f"목표차이={target_difference:+d} count"
+            )
+            return position
 
         if now - command_time >= timeout_s:
             driver.stop()
-            last_position = (
-                last_status.position if last_status is not None else position
-            )
             raise MotorError(
                 f"이동 시간 초과: state={state_name}, "
                 f"expected={expected_feedback_delta}, "
-                f"position={last_position}"
+                f"position={position}"
             )
 
         time.sleep(cfg.CPR_POSITION_POLL_PERIOD_S)
@@ -640,25 +645,35 @@ def run_compression(
     ros.publish_state("Compressing")
     ros.reset_compression()
     driver.prepare_incremental_motion(compression_speed_setting)
+    applied_speed_setting = driver.read_u16(cfg.REG_INTERNAL_SPEED)
+    print(
+        "[속도 레지스터 확인] "
+        f"요청={compression_speed_setting} | "
+        f"0x002D 읽기={applied_speed_setting}"
+    )
+    if applied_speed_setting != compression_speed_setting:
+        raise MotorError(
+            "내부 속도 설정 검증 실패: "
+            f"requested={compression_speed_setting}, "
+            f"readback={applied_speed_setting}"
+        )
+    cycle_start_position = start_pos
+    cycle_current_trip_count = 0
 
     for count in range(1, cfg.REPEAT_COUNT + 1):
-        cycle_start_time = time.monotonic()
-        down_status = move_incremental_cpr_fast(
+        down_position = move_incremental_cpr_fast(
             driver,
             ros,
             depth_command,
             depth_feedback,
             compression_output_rpm,
             "COMPRESSION_DOWN",
+            start_position=cycle_start_position,
         )
         actual_depth_cm = feedback_counts_to_cm(
-            abs(down_status.position - start_pos)
+            abs(down_position - cycle_start_position)
         )
         ros.count_compression(actual_depth_cm)
-        print(
-            f"[CPR] count={count}, depth={actual_depth_cm:.3f} cm, "
-            f"bpm={ros.compression_bpm:.1f}"
-        )
 
         move_incremental_cpr_fast(
             driver,
@@ -667,17 +682,48 @@ def run_compression(
             -depth_feedback,
             compression_output_rpm,
             "COMPRESSION_UP",
+            start_position=down_position,
+            completion_tolerance_counts=max(
+                cfg.POSITION_TOLERANCE_UNITS,
+                round(
+                    abs(depth_feedback)
+                    * cfg.CPR_RETURN_COMPLETION_TOLERANCE_RATIO
+                ),
+            ),
         )
-        cycle_elapsed_s = time.monotonic() - cycle_start_time
-        actual_cycle_bpm = (
-            60.0 / cycle_elapsed_s if cycle_elapsed_s > 0 else 0.0
+
+        # 빠른 완료 판정은 목표 위치를 통과하는 즉시 반환하므로 모터의
+        # 내부 이동이 아직 끝나지 않았을 수 있다. 상세 상태 통신이 만들던
+        # 우연한 정착시간에 의존하지 않고, 복귀 직후 명시적으로 기동을
+        # 해제한 다음 최소 상태를 읽어 다음 사이클을 준비한다.
+        driver.stop()
+
+        # 알람+운전상태, 전류, 최신 위치만 세 번의 통신으로 읽는다.
+        # 방향·속도·이동량은 명령과 위치 샘플로 계산하므로 다시 읽지 않는다.
+        cycle_status = driver.read_cycle_status()
+        check_alarm_value(cycle_status.alarm)
+        cycle_current_trip_count = update_software_current_trip(
+            cycle_status.current_raw,
+            cycle_current_trip_count,
         )
+        ros.publish_motor_status(
+            cycle_status.position,
+            cycle_status.current_raw,
+        )
+        return_position_difference = cycle_status.position - start_pos
         print(
-            f"[CPR CYCLE] count={count} | "
-            f"왕복시간={cycle_elapsed_s:.3f}s | "
-            f"실제={actual_cycle_bpm:.1f} BPM | "
-            f"목표={cfg.TARGET_BPM:.1f} BPM"
+            f"[CPR] {count}/{cfg.REPEAT_COUNT} | "
+            f"방향={cfg.POSITIVE_DIRECTION_NAME}→{cfg.NEGATIVE_DIRECTION_NAME} | "
+            f"속도={compression_output_rpm:.1f} rpm | "
+            f"전류={cycle_status.current_raw} | "
+            f"위치={cycle_status.position} | "
+            f"위치차이={return_position_difference:+d} count | "
+            f"깊이={actual_depth_cm:.3f} cm | "
+            f"BPM={ros.compression_bpm:.1f}"
         )
+        # read_cycle_status()가 위치를 마지막에 읽으므로 이 값이 다음
+        # 사이클의 가장 최신 기준 위치다. 별도 위치 통신은 추가하지 않는다.
+        cycle_start_position = cycle_status.position
 
 
 def return_to_feedback_position(
@@ -699,6 +745,56 @@ def return_to_feedback_position(
         feedback_delta,
         cfg.RETURN_OUTPUT_SPEED_RPM,
         "RETURN_TO_INITIAL",
+        allow_direction_change_grace=True,
+    )
+
+
+def prepare_zero_start_position(
+    driver: MotorDriver,
+    ros: MotorRosBridge,
+) -> int:
+    """CPR 시작 전에 축을 설정된 피드백 위치 0으로 물리적으로 복귀한다."""
+    target_position = cfg.START_FEEDBACK_POSITION
+
+    # 위치 명령 환산 오차가 남으면 한 번 더 보정한다. 반복 횟수를 제한해
+    # 잘못된 피드백이나 기구 걸림에서 무한 왕복하지 않도록 한다.
+    for attempt in range(1, 3):
+        current_position = driver.read_position()
+        remaining_counts = target_position - current_position
+        if abs(remaining_counts) <= cfg.POSITION_TOLERANCE_UNITS:
+            print(
+                f"[START POSITION] 준비 완료 | 위치={current_position} | "
+                f"목표={target_position}"
+            )
+            return target_position
+
+        remaining_cm = feedback_counts_to_cm(abs(remaining_counts))
+        print(
+            f"[START POSITION] 0 위치 복귀 {attempt}/2 | "
+            f"현재={current_position} | 목표={target_position} | "
+            f"이동거리={remaining_cm:.3f} cm"
+        )
+        ros.publish_state("RETURNING_TO_START_ZERO")
+        return_to_feedback_position(
+            driver,
+            ros,
+            target_position,
+        )
+
+    final_position = driver.read_position()
+    if (
+        abs(final_position - target_position)
+        <= cfg.POSITION_TOLERANCE_UNITS
+    ):
+        print(
+            f"[START POSITION] 준비 완료 | 위치={final_position} | "
+            f"목표={target_position}"
+        )
+        return target_position
+    raise MotorError(
+        "시작 위치 0 복귀 실패: "
+        f"target={target_position}, actual={final_position}, "
+        f"error={final_position - target_position}"
     )
 
 
@@ -728,6 +824,9 @@ def fault_stop(driver: MotorDriver, ros: MotorRosBridge, reason: str) -> None:
 
 
 def run_once(driver: MotorDriver, ros: MotorRosBridge, initial_pos: int) -> None:
+    # 직전 실행이 고장 정지되어 자동 복귀하지 않았더라도 새 압박을 시작하기
+    # 전에 반드시 물리적 0 위치로 돌아간다.
+    initial_pos = prepare_zero_start_position(driver, ros)
     print("\n============================================================")
     print("새 모터 CPR 증분 위치 시퀀스 시작")
     print("============================================================")
@@ -779,12 +878,17 @@ def main() -> None:
 
         servo_off_position = driver.read_position()
         print(f"[SETUP] Servo OFF 위치: {servo_off_position}")
-        input("안전을 확인한 후 Enter를 누르면 Servo ON 합니다. Ctrl+C=취소: ")
+        input(
+            "안전을 확인한 후 Enter를 누르면 Servo ON 및 위치 0 복귀를 "
+            "시작합니다. Ctrl+C=취소: "
+        )
 
         driver.enable()
         time.sleep(0.2)
-        initial_pos = driver.read_position()
-        print(f"[INITIAL] Servo ON 후 기준 위치 저장: {initial_pos}")
+        servo_on_position = driver.read_position()
+        print(f"[INITIAL] Servo ON 직후 위치: {servo_on_position}")
+        initial_pos = prepare_zero_start_position(driver, ros)
+        print(f"[INITIAL] 압박 시작 기준 위치: {initial_pos}")
         print_runtime_settings(initial_pos)
 
         print("[READY] /motor_start=True 를 기다립니다.")

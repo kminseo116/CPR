@@ -36,6 +36,16 @@ class MotorStatus:
     run_status: int
 
 
+@dataclass(frozen=True)
+class MotorCycleStatus:
+    """빠른 반복 운전 중 필요한 최소 안전 상태."""
+
+    position: int
+    current_raw: int
+    alarm: int
+    run_status: int
+
+
 class MotorError(RuntimeError):
     """모터 통신 또는 제어 오류."""
 
@@ -319,11 +329,15 @@ class MotorDriver:
         if output_rpm <= 0:
             raise MotorError(f"출력축 속도는 0보다 커야 합니다: {output_rpm}")
 
-        if output_rpm > cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM:
+        allowed_output_rpm = min(
+            cfg.MAX_OUTPUT_SPEED_RPM,
+            cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM,
+        )
+        if output_rpm > allowed_output_rpm:
             raise MotorError(
-                "요청한 출력축 속도가 현재 실제 검증 범위를 초과합니다: "
+                "요청한 출력축 속도가 허용 범위를 초과합니다: "
                 f"requested={output_rpm:.2f} rpm, "
-                f"verified_limit={cfg.MAX_VERIFIED_OUTPUT_SPEED_RPM:.2f} rpm"
+                f"allowed={allowed_output_rpm:.2f} rpm"
             )
 
         speed_setting = round(
@@ -342,11 +356,14 @@ class MotorDriver:
     def set_speed(self, speed_setting: int) -> None:
         """모터 내부 속도 설정값을 확인된 범위 0~3000으로 기록한다."""
         speed_setting = int(speed_setting)
-        if not 0 <= speed_setting <= cfg.MAX_INTERNAL_SPEED_SETTING:
+        # 0x002D의 매뉴얼 상한은 3000이다. 설정 파일의 값을 잘못 높여도
+        # 범위 밖 명령이 실제 장치로 전송되지 않도록 하드웨어 한계를 고정한다.
+        allowed_setting = min(cfg.MAX_INTERNAL_SPEED_SETTING, 3000)
+        if not 0 <= speed_setting <= allowed_setting:
             raise MotorError(
                 "내부 속도 설정값 범위 초과: "
                 f"value={speed_setting}, "
-                f"limit={cfg.MAX_INTERNAL_SPEED_SETTING}"
+                f"limit={allowed_setting}"
             )
         self.write_u16(cfg.REG_INTERNAL_SPEED, speed_setting)
 
@@ -409,6 +426,36 @@ class MotorDriver:
             position_error=self.read_i32(cfg.REG_POSITION_ERROR),
             alarm=self.read_u16(cfg.REG_ALARM_STATUS),
             run_status=self.read_u16(cfg.REG_RUN_STATUS),
+        )
+
+    def read_cycle_status(self) -> MotorCycleStatus:
+        """사이클 사이에 필요한 상태만 세 번의 통신으로 읽는다.
+
+        알람과 운전 상태는 연속 레지스터라 한 번에 읽고, 전류를 읽은 뒤
+        다음 증분 이동의 기준으로 쓸 현재 위치를 마지막에 읽는다.
+        방향·속도·이동량은 위치 샘플과 명령값으로 계산하므로 읽지 않는다.
+        """
+        alarm_and_run = self._retry(
+            lambda: self.instrument.read_registers(
+                cfg.REG_ALARM_STATUS,
+                2,
+                functioncode=3,
+            ),
+            "사이클 알람/운전 상태 읽기",
+        )
+        if len(alarm_and_run) != 2:
+            raise MotorError(
+                "사이클 알람/운전 상태 길이 오류: "
+                f"received={len(alarm_and_run)}"
+            )
+
+        current_raw = self.read_u16(cfg.REG_CURRENT_CURRENT)
+        position = self.read_position()
+        return MotorCycleStatus(
+            position=position,
+            current_raw=current_raw,
+            alarm=int(alarm_and_run[0]),
+            run_status=int(alarm_and_run[1]),
         )
 
     # ======================================================================

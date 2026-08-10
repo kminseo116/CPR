@@ -77,11 +77,10 @@ MIN_DEPTH_CM = 0.5
 MAX_DEPTH_CM = 6.0
 
 TARGET_BPM = 107.0
+
 # 깊이와 BPM으로 계산한 이론 rpm에 곱하는 시험 보정값이다.
-# 먼저 1.00으로 실제 BPM을 측정한 뒤 필요한 경우 소폭 조정한다.
-CPR_SPEED_MARGIN = 1.00
-# 첫 통합 시험은 1회만 수행한다. 무부하 검증 후 단계적으로 늘린다.
-REPEAT_COUNT = 1
+CPR_SPEED_MARGIN = 2.3
+REPEAT_COUNT = 10
 
 # 매뉴얼 0x002D 내부 속도 설정의 허용 범위는 0~3000이다.
 MAX_INTERNAL_SPEED_SETTING = 3000
@@ -99,23 +98,20 @@ MAX_OUTPUT_SPEED_RPM = min(
 # MSTEP 1000, 무부하 60 mm 왕복에서 2000 rpm 도달을 확인했다.
 # 실제 압박 하중에서는 아직 검증되지 않았으므로 반드시 시험 장비에서
 # 1회 압박부터 확인한다.
-MAX_VERIFIED_OUTPUT_SPEED_RPM = 2000.0
+MAX_VERIFIED_OUTPUT_SPEED_RPM = 3000.0
 
-# 첫 MSTEP 1000 통합 시험은 보수적으로 25 rpm에서 수행한다.
-INITIAL_SPEED_RPM = 25.0
-SEARCH_SPEED_RPM = 25.0
+INITIAL_SPEED_RPM = 30.0
+SEARCH_SPEED_RPM = 30.0
 # 압박 속도는 motor_main에서 깊이와 TARGET_BPM으로 자동 계산한다.
 # 이 값은 설정 표시와 이전 코드 호환용 상한 후보로만 유지한다.
-COMPRESSION_SPEED_RPM = 2000.0
+COMPRESSION_SPEED_RPM = 2500.0
 RETURN_OUTPUT_SPEED_RPM = INITIAL_SPEED_RPM
 SEARCH_OUTPUT_SPEED_RPM = SEARCH_SPEED_RPM
 COMPRESSION_OUTPUT_SPEED_RPM = COMPRESSION_SPEED_RPM
 
 # 매뉴얼 0x002E, 0x002F. 범위 0~100, 공장 기본값 10.
-# 35와 40의 60 mm 이동시간은 거의 같았지만 40에서 전류 피크가 더 컸다.
-# 현재 무부하 통합 시험 후보는 35로 둔다.
-ACCEL_FACTOR = 35
-DECEL_FACTOR = 35
+ACCEL_FACTOR = 67
+DECEL_FACTOR = 50
 
 
 # ============================================================================
@@ -144,6 +140,9 @@ CONTACT_CURRENT_CONFIRM_COUNT = 5
 # 5. 안전 설정
 # ============================================================================
 
+# 프로그램 시작과 각 CPR 실행 전에 물리적으로 복귀할 피드백 위치다.
+START_FEEDBACK_POSITION = 0
+
 MIN_POSITION_CMD = -2_000_000
 MAX_POSITION_CMD = 2_000_000
 POSITION_TOLERANCE_UNITS = 30
@@ -158,12 +157,30 @@ MOVE_TIMEOUT_S = 30.0
 STATUS_PERIOD_S = 0.05
 MOVE_STATUS_LOG_PERIOD_S = 1.0
 
-# CPR 왕복 전용 빠른 명령·상태 확인 설정. 접촉 탐색과 초기 복귀에는
-# 적용하지 않는다. 전체 안전 상태는 아래 주기로 읽고 위치는 더 자주 읽는다.
-CPR_COMMAND_EDGE_DELAY_S = 0.005
+# CPR 왕복 전용 빠른 명령·위치 확인 설정. 접촉 탐색과 초기 복귀에는
+# 적용하지 않는다. 왕복 중에는 위치만 읽고 상세 상태는 사이클 후 확인한다.
+CPR_COMMAND_EDGE_DELAY_S = 0.003
 CPR_POSITION_POLL_PERIOD_S = 0.002
-CPR_SAFETY_STATUS_PERIOD_S = 0.10
-CPR_FAST_CONFIRM_COUNT = 1
+# 위치 읽기의 순간 지연으로 최고속도가 과장되지 않도록 이 시간 구간의
+# 위치 변화로 이동 중 속도를 추정한다. 추가 Modbus 요청은 발생하지 않는다.
+CPR_SPEED_ESTIMATE_WINDOW_S = 0.05
+
+# 고속 이동에서는 한 번의 RS485 위치 읽기 사이에 목표점을 통과할 수 있다.
+# 목표 통과 자체는 즉시 방향 전환으로 처리하고, 아래 한도를 넘는 큰 초과만
+# 비정상 이동으로 판정한다. 일반 이동의 정밀 초과 한도와는 별도다.
+CPR_MIN_EMERGENCY_OVERSHOOT_COUNTS = 4096
+CPR_MAX_EMERGENCY_OVERSHOOT_RATIO = 0.25
+
+# 방향 전환 명령 직후에는 관성 때문에 기존 방향으로 조금 더 움직일 수
+# 있다. 일반 복귀는 시간과 거리를 함께 사용하고, 빠른 CPR은 실제 복귀
+# 방향 움직임이 시작되기 전까지 아래 거리 안의 관성만 허용한다.
+CPR_DIRECTION_CHANGE_GRACE_S = 0.10
+CPR_DIRECTION_CHANGE_GRACE_COUNTS = 4096
+
+# 고속 CPR 복귀는 관성과 위치 명령 환산 차이로 접촉 기준점 직전에서
+# 정지할 수 있다. 압박 하강 정밀도는 그대로 유지하고 복귀 완료에만
+# 이동량 대비 아래 비율을 허용한다. 이후 초기 위치 복귀가 잔차를 보정한다.
+CPR_RETURN_COMPLETION_TOLERANCE_RATIO = 0.015
 
 # 실제 이동거리와 출력축 rpm으로 motor_main의 제한시간을 계산한다.
 MOVE_TIMEOUT_MIN_S = 3.0
