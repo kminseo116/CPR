@@ -478,11 +478,13 @@ def move_incremental_cpr_fast(
             movement_detected = True
 
         wrong_direction = feedback_delta * expected_feedback_delta < 0
+
         initial_direction_change_inertia = (
             wrong_direction
-            and not movement_detected
+            and elapsed_s <= cfg.CPR_DIRECTION_CHANGE_GRACE_S
             and abs_delta <= cfg.CPR_DIRECTION_CHANGE_GRACE_COUNTS
         )
+
         if wrong_direction and not initial_direction_change_inertia:
             driver.stop()
             raise MotorError(

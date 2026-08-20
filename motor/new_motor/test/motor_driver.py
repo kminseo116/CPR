@@ -280,7 +280,7 @@ class MotorDriver:
         self.write_u16(cfg.REG_MOTOR_START, 0)
         self.write_u16(cfg.REG_ENABLE_METHOD, 1)
         self.write_u16(cfg.REG_INTERNAL_ENABLE, 1)
-        time.sleep(0.1)
+        time.sleep(0.05)
 
         enable_method = self.read_u16(cfg.REG_ENABLE_METHOD)
         internal_enable = self.read_u16(cfg.REG_INTERNAL_ENABLE)
