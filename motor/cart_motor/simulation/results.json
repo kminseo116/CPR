@@ -1,0 +1,244 @@
+[
+  {
+    "scenario": "round_trip",
+    "transitions": [
+      [
+        0.0,
+        "READY"
+      ],
+      [
+        0.263,
+        "FORWARD_MOVING"
+      ],
+      [
+        1.363,
+        "AT_END"
+      ],
+      [
+        2.266,
+        "BACKWARD_MOVING"
+      ],
+      [
+        3.366,
+        "READY"
+      ]
+    ],
+    "final_state": "READY",
+    "final_position": 10000,
+    "error": null,
+    "start_position": 10000,
+    "end_position": 55000
+  },
+  {
+    "scenario": "interrupt_return",
+    "transitions": [
+      [
+        0.0,
+        "READY"
+      ],
+      [
+        0.263,
+        "FORWARD_MOVING"
+      ],
+      [
+        1.016,
+        "BACKWARD_MOVING"
+      ],
+      [
+        1.616,
+        "READY"
+      ]
+    ],
+    "final_state": "READY",
+    "final_position": 10000,
+    "error": null,
+    "start_position": 10000,
+    "end_position": 55000
+  },
+  {
+    "scenario": "emergency_stop",
+    "transitions": [
+      [
+        0.0,
+        "READY"
+      ],
+      [
+        0.263,
+        "FORWARD_MOVING"
+      ],
+      [
+        0.823,
+        "STOPPED"
+      ]
+    ],
+    "final_state": "STOPPED",
+    "final_position": 30967,
+    "error": null,
+    "start_position": 10000,
+    "end_position": 55000
+  },
+  {
+    "scenario": "overcurrent",
+    "transitions": [
+      [
+        0.0,
+        "READY"
+      ],
+      [
+        0.263,
+        "FORWARD_MOVING"
+      ],
+      [
+        1.363,
+        "AT_END"
+      ],
+      [
+        1.503,
+        "FAULT"
+      ]
+    ],
+    "final_state": "FAULT",
+    "final_position": 55000,
+    "error": "[SAFETY] 과전류 지속 감지: 131.000 A > 130.000 A",
+    "start_position": 10000,
+    "end_position": 55000
+  },
+  {
+    "scenario": "driver_fault",
+    "transitions": [
+      [
+        0.0,
+        "READY"
+      ],
+      [
+        0.263,
+        "FORWARD_MOVING"
+      ],
+      [
+        0.603,
+        "FAULT"
+      ]
+    ],
+    "final_state": "FAULT",
+    "final_position": 19967,
+    "error": "[FAULT] 드라이버 고장 코드 발생: 7",
+    "start_position": 10000,
+    "end_position": 55000
+  },
+  {
+    "scenario": "timeout",
+    "transitions": [
+      [
+        0.0,
+        "READY"
+      ],
+      [
+        0.263,
+        "FORWARD_MOVING"
+      ],
+      [
+        30.383,
+        "FAULT"
+      ]
+    ],
+    "final_state": "FAULT",
+    "final_position": 10000,
+    "error": "FORWARD_MOVING 목표 위치 도달 시간 초과",
+    "start_position": 10000,
+    "end_position": 55000
+  },
+  {
+    "scenario": "position_limit",
+    "transitions": [
+      [
+        0.0,
+        "FAULT"
+      ]
+    ],
+    "final_state": "FAULT",
+    "final_position": null,
+    "error": "[SAFETY] configured end 위치 제한 초과: 320000, limit=[-300000, 300000]",
+    "start_position": 10000,
+    "end_position": 320000
+  },
+  {
+    "scenario": "unset_positions",
+    "transitions": [
+      [
+        0.0,
+        "FAULT"
+      ]
+    ],
+    "final_state": "FAULT",
+    "final_position": null,
+    "error": "START_POS와 END_POS를 엔코더 절대 위치 정수(unit)로 지정하세요.",
+    "start_position": null,
+    "end_position": null
+  },
+  {
+    "scenario": "overlapping_positions",
+    "transitions": [
+      [
+        0.0,
+        "FAULT"
+      ]
+    ],
+    "final_state": "FAULT",
+    "final_position": null,
+    "error": "시작·종료 위치 간격은 도착 허용오차의 2배보다 커야 합니다.",
+    "start_position": 10000,
+    "end_position": 10300
+  },
+  {
+    "scenario": "reverse_coordinates",
+    "transitions": [
+      [
+        0.0,
+        "READY"
+      ],
+      [
+        0.263,
+        "FORWARD_MOVING"
+      ],
+      [
+        1.363,
+        "AT_END"
+      ],
+      [
+        2.266,
+        "BACKWARD_MOVING"
+      ],
+      [
+        3.366,
+        "READY"
+      ]
+    ],
+    "final_state": "READY",
+    "final_position": 10000,
+    "error": null,
+    "start_position": 10000,
+    "end_position": -35000
+  },
+  {
+    "scenario": "startup_return",
+    "transitions": [
+      [
+        0.0,
+        "NOT_AT_START"
+      ],
+      [
+        0.463,
+        "BACKWARD_MOVING"
+      ],
+      [
+        0.963,
+        "READY"
+      ]
+    ],
+    "final_state": "READY",
+    "final_position": 10000,
+    "error": null,
+    "start_position": 10000,
+    "end_position": 55000
+  }
+]

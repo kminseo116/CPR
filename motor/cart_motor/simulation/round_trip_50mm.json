@@ -1,0 +1,37 @@
+{
+  "scenario": "round_trip_50mm",
+  "transitions": [
+    [
+      0.0,
+      "READY"
+    ],
+    [
+      0.263,
+      "FORWARD_MOVING"
+    ],
+    [
+      1.963,
+      "AT_END"
+    ],
+    [
+      2.566,
+      "BACKWARD_MOVING"
+    ],
+    [
+      4.266,
+      "READY"
+    ]
+  ],
+  "final_state": "READY",
+  "final_position": 10000,
+  "error": null,
+  "start_position": 10000,
+  "end_position": 85000,
+  "move_rpm": 300,
+  "distance_mm": 50,
+  "command_times_s": {
+    "start": 0.2,
+    "back": 2.5
+  },
+  "model": "Ideal acceleration-limited motion; instantaneous stop; no bus latency or load physics"
+}
