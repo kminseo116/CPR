@@ -300,8 +300,11 @@ def move_absolute_position(motor, target_pos):
 
 
 def setup_speed_search_mode(motor):
-    """PV 속도 모드 설정. 접촉 탐색용."""
-    print(f"[SETUP] PV 속도 탐색 모드 | {cfg.SEARCH_RPM} rpm")
+    """PV 속도 모드 설정. 로봇 전진 방향으로 접촉 탐색."""
+    if cfg.FORWARD_DIRECTION not in (-1, 1) or cfg.SEARCH_RPM <= 0:
+        raise ValueError('FORWARD_DIRECTION은 -1 또는 1, SEARCH_RPM은 양수여야 합니다.')
+    forward_rpm = cfg.FORWARD_DIRECTION * cfg.SEARCH_RPM
+    print(f"[SETUP] PV 전진 탐색 모드 | {forward_rpm} rpm")
 
     write_u16(motor, cfg.ADDR_P10_03, 3)
     time.sleep(0.01)
@@ -309,13 +312,13 @@ def setup_speed_search_mode(motor):
     write_i32(motor, cfg.ADDR_P10_23, rpm_to_command_speed(cfg.MAX_RPM_LIMIT))
     time.sleep(0.01)
 
-    write_i32(motor, cfg.ADDR_P10_42, rpm_to_command_speed(cfg.SEARCH_RPM))
+    write_i32(motor, cfg.ADDR_P10_42, rpm_to_command_speed(forward_rpm))
     time.sleep(0.01)
 
 
 def start_forward_speed_run(motor):
-    """PV 속도 운전 시작."""
-    print("[RUN] 정회전 속도 운전 시작")
+    """setup_speed_search_mode에서 설정한 부호의 PV 속도 운전 시작."""
+    print("[RUN] 로봇 전진 속도 운전 시작")
     write_u16(motor, cfg.ADDR_P0D_08, 8)
     time.sleep(0.01)
 

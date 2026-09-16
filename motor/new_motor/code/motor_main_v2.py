@@ -17,7 +17,7 @@ CPR 실행
    - 2순위: 로드셀 stale + 전류 증가
 4. START_POS와 END_POS 사이 왕복
 5. 정상 STOP 시 INITIAL_POS 복귀
-6. 과전류 시 INITIAL_POS 복귀 시도 후 FAULT 종료
+6. 과전류 시 현재 위치 정지 후 FAULT 종료
 7. 일반 모터 오류 시 복귀 없이 FAULT 종료
 8. Ctrl+C 시 INITIAL_POS 복귀 시도 후 Servo ON 종료
 """
@@ -127,19 +127,9 @@ def print_runtime_settings(initial_pos: int) -> None:
 # 3. 알람 및 전류 안전 검사
 # ============================================================================
 
-def check_alarm_status(
-    status: MotorStatus,
-    ignore_overcurrent_alarm: bool = False,
-) -> None:
-    """모터 알람 상태를 검사하고 위험 알람은 즉시 예외 처리한다.
-
-    과전류 후 초기 위치로 복귀할 때는 이미 발생한 과전류 비트만
-    제한적으로 무시할 수 있다. 다른 알람은 계속 검사한다.
-    """
+def check_alarm_status(status: MotorStatus) -> None:
+    """모터 알람 상태를 검사하고 위험 알람은 즉시 예외 처리한다."""
     alarm_value = int(status.alarm)
-
-    if ignore_overcurrent_alarm:
-        alarm_value &= ~cfg.ALARM_OVERCURRENT
 
     if alarm_value == 0:
         return
@@ -182,8 +172,6 @@ def move_and_wait(
     speed_rpm: int,
     state_name: str,
     monitor_stop_request: bool = True,
-    ignore_overcurrent_alarm: bool = False,
-    monitor_software_current: bool = True,
 ) -> MotorStatus:
     """한 개의 목표 위치로 이동하고 도달할 때까지 기다린다.
 
@@ -215,16 +203,11 @@ def move_and_wait(
                 raise UserStopRequested(stop_reason)
 
         status = driver.read_status()
-        check_alarm_status(
-            status,
-            ignore_overcurrent_alarm=ignore_overcurrent_alarm,
+        check_alarm_status(status)
+        current_trip_count = update_software_current_trip(
+            status.current_raw,
+            current_trip_count,
         )
-
-        if monitor_software_current:
-            current_trip_count = update_software_current_trip(
-                status.current_raw,
-                current_trip_count,
-            )
 
         ros.publish_motor_status(
             status.position,
@@ -445,42 +428,9 @@ def run_compression(
     print(f"[CPR] END_POS={end_pos}")
     print(f"[CPR] DEPTH={depth_cm:.2f} cm")
     print(f"[CPR] SPEED={cfg.COMPRESSION_SPEED_RPM} rpm")
-    # print(f"[CPR] REPEAT={cfg.REPEAT_COUNT}")
 
     ros.publish_state("Compressing")
     ros.reset_compression()
-
-    # 일정 횟수가 되면 정지함
-    # for count in range(1, cfg.REPEAT_COUNT + 1):
-    #     # 7-1. START_POS -> END_POS: 아래로 압박
-    #     move_and_wait(
-    #         driver=driver,
-    #         ros=ros,
-    #         target_position=end_pos,
-    #         speed_rpm=cfg.COMPRESSION_SPEED_RPM,
-    #         state_name="COMPRESSION_DOWN",
-    #     )
-
-    #     actual_position = driver.read_position()
-    #     actual_depth_cm = position_units_to_cm(
-    #         abs(actual_position - start_pos)
-    #     )
-    #     ros.count_compression(actual_depth_cm)
-
-    #     print(
-    #         f"[CPR] count={count}, "
-    #         f"depth={actual_depth_cm:.2f} cm, "
-    #         f"bpm={ros.compression_bpm:.1f}"
-    #     )
-
-    #     # 7-2. END_POS -> START_POS: 위로 복귀 및 완전 이완
-    #     move_and_wait(
-    #         driver=driver,
-    #         ros=ros,
-    #         target_position=start_pos,
-    #         speed_rpm=cfg.COMPRESSION_SPEED_RPM,
-    #         state_name="COMPRESSION_UP",
-    #     )
 
     # 무한 반복 왕복
     count = 0
@@ -527,12 +477,10 @@ def return_to_initial(
     ros: MotorRosBridge,
     initial_pos: int,
     reason: str,
-    ignore_overcurrent_alarm: bool = False,
-    monitor_software_current: bool = True,
 ) -> bool:
     """현재 이동을 정지하고 INITIAL_POS 복귀를 시도한다.
 
-    정상 정지, 접촉 탐색 실패, 과전류 및 Ctrl+C에서 공통으로 사용한다.
+    정상 정지, 접촉 탐색 실패 및 Ctrl+C에서 공통으로 사용한다.
     복귀 성공 여부와 관계없이 driver.disable()은 호출하지 않으므로
     Servo는 ON 상태를 유지한다.
     """
@@ -568,14 +516,6 @@ def return_to_initial(
             # 기존 motor_stop/loadcell_stop_request 때문에
             # 복귀가 다시 중단되지 않도록 한다.
             monitor_stop_request=False,
-
-            # 드라이버 과전류 복귀에서는 이미 발생한 과전류 비트만 무시한다.
-            # 다른 모터 알람은 계속 검사한다.
-            ignore_overcurrent_alarm=ignore_overcurrent_alarm,
-
-            # 소프트웨어 전류 초과 복귀에서는 동일 Trip의 재발만 막는다.
-            # 드라이버 알람과 위치 편차, 이동 시간은 계속 검사한다.
-            monitor_software_current=monitor_software_current,
         )
 
     except Exception as exc:
@@ -712,34 +652,13 @@ def run_once(driver: MotorDriver, ros: MotorRosBridge, initial_pos: int) -> None
         )
 
     except OvercurrentFault as exc:
-        return_to_initial(
-            driver=driver,
-            ros=ros,
-            initial_pos=initial_pos,
-            reason="OVERCURRENT",
-
-            # 이미 발생한 드라이버 과전류 비트만 복귀 중 무시한다.
-            ignore_overcurrent_alarm=True,
-            monitor_software_current=True,
-        )
-
-        # 복귀 성공 여부와 관계없이 과전류 발생 후 프로그램은 종료한다.
+        # Fault 상태에서 이동 명령 수락 여부가 매뉴얼에 보장되지 않으므로
+        # 알람 비트를 무시한 자동 복귀를 시도하지 않는다.
+        fault_stop(driver, ros, "OVERCURRENT")
         raise MotorError(str(exc)) from exc
 
     except SoftwareCurrentTrip as exc:
-        return_to_initial(
-            driver=driver,
-            ros=ros,
-            initial_pos=initial_pos,
-            reason="SOFTWARE_CURRENT_TRIP",
-
-            # 동일 소프트웨어 Trip의 즉시 재발만 막고
-            # 드라이버 알람은 계속 검사한다.
-            ignore_overcurrent_alarm=False,
-            monitor_software_current=False,
-        )
-
-        # 복귀 후에도 재시작하지 않고 프로그램 종료
+        fault_stop(driver, ros, "SOFTWARE_CURRENT_TRIP")
         raise MotorError(str(exc)) from exc
     
     except Exception:
@@ -768,6 +687,7 @@ def main() -> None:
         # 11-1. 프로그램 시작 시 모터를 한 번만 설정한다.
         ros.publish_state("SETUP")
         driver.verify_connection()
+        driver.verify_control_mode()
         driver.reset()
         driver.setup_runtime()
         driver.enable()
@@ -812,11 +732,7 @@ def main() -> None:
                 )
 
             except MotorError as exc:
-                # 과전류:
-                # run_once()에서 INITIAL_POS 복귀를 시도한 후 종료
-                #
-                # 일반 모터 오류:
-                # 복귀하지 않고 Servo ON 상태로 종료
+                # 모든 Fault는 추가 이동 없이 현재 위치에 정지한다.
                 fault_exit = True
                 print(f"[FAULT EXIT] {exc}")
                 print(
@@ -881,8 +797,6 @@ def main() -> None:
                 # driver.disable()을 호출하지 않는다.
 
             elif fault_exit:
-                # 과전류는 run_once()에서 초기복귀를 시도한 뒤 이곳으로 들어온다.
-                # 일반 모터 오류는 현재 위치에 정지한 뒤 이곳으로 들어온다.
                 print(
                     "[EXIT] FAULT 종료: "
                     "Servo ON 유지"

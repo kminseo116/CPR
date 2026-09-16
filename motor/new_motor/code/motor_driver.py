@@ -179,12 +179,43 @@ class MotorDriver:
         """알람 상태를 읽어 통신 연결을 확인한다."""
         self.read_u16(cfg.REG_ALARM_STATUS)
 
+    def verify_control_mode(self) -> None:
+        """재기동 적용 항목인 전체 제어 모드가 위치 모드인지 확인한다."""
+        actual_mode = self.read_u16(cfg.REG_CONTROL_MODE)
+        if actual_mode == cfg.EXPECTED_CONTROL_MODE:
+            return
+
+        raise MotorError(
+            "제어 모드가 위치 모드가 아닙니다: "
+            f"actual={actual_mode}, expected={cfg.EXPECTED_CONTROL_MODE}. "
+            "별도 설정 절차에서 0x0000=1로 저장하고 모터 전원을 "
+            "재인가한 뒤 다시 실행하세요."
+        )
+
     def setup_runtime(self) -> None:
         """재기동 없이 적용 가능한 런타임 설정을 적용한다."""
+        # 0x0000은 여기서 변경하지 않는다. 매뉴얼상 변경 뒤 재기동이
+        # 필요하므로 잘못된 모드에서는 운동 명령을 보내기 전에 차단한다.
+        self.verify_control_mode()
         self.write_u16(cfg.REG_ENABLE_METHOD, 1)
         self.write_u16(cfg.REG_POSITION_COMMAND_MODE, 0)
         self.write_u16(cfg.REG_ACCEL, cfg.ACCEL_FACTOR)
         self.write_u16(cfg.REG_DECEL, cfg.DECEL_FACTOR)
+
+        # 매뉴얼의 목록(DWORD)과 통신 예제(WORD)가 충돌하므로 실제로
+        # 기록된 값을 즉시 읽어 단일 WORD 구현이 맞는지 확인한다.
+        for name, address, expected in (
+            ("가속", cfg.REG_ACCEL, cfg.ACCEL_FACTOR),
+            ("감속", cfg.REG_DECEL, cfg.DECEL_FACTOR),
+        ):
+            actual = self.read_u16(address)
+            if actual != expected:
+                raise MotorError(
+                    f"{name} 설정 확인 실패: address=0x{address:04X}, "
+                    f"actual={actual}, expected={expected}. "
+                    "매뉴얼의 WORD/DWORD 정의를 실장비에서 확인하세요."
+                )
+
         self.write_u16(
             cfg.REG_MAX_SPEED,
             min(cfg.COMPRESSION_SPEED_RPM, 50_000),
@@ -247,7 +278,8 @@ class MotorDriver:
     def read_status(self) -> MotorStatus:
         return MotorStatus(
             position=self.read_position(),
-            speed_rpm=self.read_i16(cfg.REG_CURRENT_SPEED),
+            # 매뉴얼의 현재 속도 범위는 0~6000이며 signed 표기가 없다.
+            speed_rpm=self.read_u16(cfg.REG_CURRENT_SPEED),
             current_raw=self.read_u16(cfg.REG_CURRENT_CURRENT),
             position_error=self.read_i32(cfg.REG_POSITION_ERROR),
             alarm=self.read_u16(cfg.REG_ALARM_STATUS),

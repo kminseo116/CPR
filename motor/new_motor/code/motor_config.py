@@ -57,7 +57,6 @@ MIN_DEPTH_CM = 1.0
 MAX_DEPTH_CM = 6.0
 
 TARGET_BPM = 107.0
-# REPEAT_COUNT = 1000
 
 # 속도 설정 [rpm]
 INITIAL_SPEED_RPM = 200
@@ -164,6 +163,10 @@ REG_POSITION_ERROR = 0x003F
 REG_POSITION_COMMAND_MODE = 0x0041
 REG_ABSOLUTE_POSITION = 0x0042
 REG_INCREMENT_POSITION = 0x0044
+
+# 0x0000은 변경 후 전원 재인가가 필요한 영구 설정이다.
+# 실행 중에는 쓰지 않고 이 값과 일치하는지만 확인한다.
+EXPECTED_CONTROL_MODE = 1
 
 
 # ============================================================================

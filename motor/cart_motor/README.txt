@@ -1,13 +1,27 @@
 실행: ROS 2 Humble / Python 환경에서 pip install pyserial minimalmodbus 필요
+
+
+시작 전 monitor.py로 위치 확인
+
+실험 결과
+START_POS = 9000          # 시작 절대 위치 [unit]: 사용자가 정수로 지정
+END_POS = -31489            # 종료 절대 위치 [unit]: 사용자가 정수로 지정
+
+하나의 판을 떨어뜨리기 위해서 40489 정도의 차이가 있으면 됨
+
 같은 디렉터리에서 python3 simple_motor.py
 전진: ros2 topic pub --once /motor_start std_msgs/msg/Bool '{data: true}'
 후진: ros2 topic pub --once /motor_back std_msgs/msg/Bool '{data: true}'
 정지: ros2 topic pub --once /motor_stop std_msgs/msg/Bool '{data: true}'
 
+
+
 motor_config.py 상단 START_POS, END_POS를 엔코더 절대 위치 정수(unit)로 지정하고 MOVE_RPM 조정.
 두 위치는 필수 설정값이며 None 상태에서는 모터 연결 전에 오류로 종료함.
-예: START_POS = 10000, END_POS = 55000 (예시일 뿐 실제 장비 위치에 맞게 지정).
-1 mm = 1500 unit. END_POS가 START_POS보다 작아도 사용 가능.
+예: START_POS = 10000, END_POS = -35000 (전진 30 mm 예시; 실제 장비 위치에 맞게 지정).
+1 mm = 1500 unit. 현재 로봇은 위치 감소 방향이 전진이므로 END_POS < START_POS로 지정.
+절대 위치는 엔코더 좌표 그대로 사용하며 FORWARD_DIRECTION을 곱하지 않음.
+속도 탐색/test.py는 FORWARD_DIRECTION = -1을 적용해 음수 속도로 전진.
 두 위치는 설정된 위치 제한 이내이고 간격은 600 unit보다 커야 함.
 기존 motor_config.py의 PORT 및 위치 제한, 모터 스케일과 리미트 설정 확인.
 실행 시 자동 이동하지 않음. 현재 위치가 시작 위치 허용오차 이내면 READY.

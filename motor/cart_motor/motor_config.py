@@ -7,9 +7,10 @@ import serial
 
 
 # ===== 자주 바꾸는 설정 =====
-START_POS = None          # 시작 절대 위치 [unit]: 사용자가 정수로 지정
-END_POS = None            # 종료 절대 위치 [unit]: 사용자가 정수로 지정
-MOVE_RPM = 300            # 전진·후진 속도 [rpm]
+START_POS = 9000          # 시작 절대 위치 [unit]: 사용자가 정수로 지정
+END_POS = -31489            # 종료 절대 위치 [unit]: 사용자가 정수로 지정
+MOVE_RPM = 100            # 전진·후진 속도 [rpm]
+FORWARD_DIRECTION = -1    # 실기 확인: 음수 방향이 로봇 전진, 양수 방향이 후진
 ARRIVAL_TOLERANCE = 300   # unit; 300 unit = 기존 기어/리드 기준 0.2 mm
 ARRIVAL_SAMPLES = 3       # 연속 확인 횟수
 POLL_S = 0.02
@@ -18,7 +19,7 @@ SAFETY_PERIOD_S = 0.2
 
 
 # 통신 설정
-PORT = "/dev/motor_rs485"
+PORT = "/dev/ttyUSB0"
 SLAVE_ID = 1
 BAUDRATE = 19200
 BYTESIZE = 8
@@ -55,7 +56,7 @@ MOTOR_UNITS_PER_MM = (
 
 # 기존 드라이버 보조 함수에서 참조하는 설정
 # simple_motor.py에서는 해당 탐색/로그/대기 함수를 호출하지 않습니다.
-SEARCH_RPM = 200          # setup_speed_search_mode
+SEARCH_RPM = 200          # 전진 탐색 속력 (양수 rpm); 부호는 FORWARD_DIRECTION 적용
 TARGET_BPM = 107.0        # print_motion_status
 LOG_PERIOD_S = 0.2        # wait_until_position_reached
 
