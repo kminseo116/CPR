@@ -9,7 +9,7 @@ import serial
 # ===== 자주 바꾸는 설정 =====
 START_POS = 9000          # 시작 절대 위치 [unit]: 사용자가 정수로 지정
 END_POS = -31489            # 종료 절대 위치 [unit]: 사용자가 정수로 지정
-MOVE_RPM = 100            # 전진·후진 속도 [rpm]
+MOVE_RPM = 200            # 전진·후진 속도 [rpm]
 FORWARD_DIRECTION = -1    # 실기 확인: 음수 방향이 로봇 전진, 양수 방향이 후진
 ARRIVAL_TOLERANCE = 300   # unit; 300 unit = 기존 기어/리드 기준 0.2 mm
 ARRIVAL_SAMPLES = 3       # 연속 확인 횟수
