@@ -83,12 +83,14 @@ class MotorDriver:
     def _retry(self, operation: Callable[[], T], description: str) -> T:
         last_error: Exception | None = None
 
-        for _ in range(cfg.RETRIES + 1):
+        for attempt in range(cfg.RETRIES + 1):
             try:
                 return operation()
             except Exception as exc:
                 last_error = exc
                 self.clear_buffers()
+                if attempt < cfg.RETRIES:
+                    time.sleep(cfg.RETRY_DELAY_S)
 
         raise MotorError(f"{description} 실패: {last_error}")
 

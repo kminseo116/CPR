@@ -25,6 +25,11 @@ from motor_ros_node import MotorRosBridge
 MOVE_CONFIRM_COUNT = 3
 MIN_FEEDBACK_MOVEMENT = 16
 
+# 고속 CPR 명령 후 이 시간 안에 최소 이동량이 확인되지 않으면
+# 명령이 실제 운전으로 이어지지 않은 것으로 판단한다.
+CPR_COMMAND_START_TIMEOUT_S = 0.5
+CPR_COMMAND_START_MIN_COUNTS = 1000
+
 MOVE_STATE_LABELS = {
     "CONTACT_SEARCH_CONTINUOUS": "접촉 탐색",
     "COMPRESSION_DOWN": "압박 하강",
@@ -477,6 +482,19 @@ def move_incremental_cpr_fast(
         ):
             movement_detected = True
 
+        if (
+            elapsed_s >= CPR_COMMAND_START_TIMEOUT_S
+            and abs_delta < CPR_COMMAND_START_MIN_COUNTS
+        ):
+            driver.stop()
+            raise MotorError(
+                f"{state_name} 이동 명령 미실행: "
+                f"elapsed={elapsed_s:.3f}s, "
+                f"expected={expected_feedback_delta}, "
+                f"actual={feedback_delta}, "
+                f"start_min={CPR_COMMAND_START_MIN_COUNTS}"
+            )
+
         wrong_direction = feedback_delta * expected_feedback_delta < 0
 
         initial_direction_change_inertia = (
@@ -672,6 +690,13 @@ def run_compression(
             compression_output_rpm,
             "COMPRESSION_DOWN",
             start_position=cycle_start_position,
+            completion_tolerance_counts=max(
+                cfg.POSITION_TOLERANCE_UNITS,
+                round(
+                    abs(depth_feedback)
+                    * cfg.CPR_DOWN_COMPLETION_TOLERANCE_RATIO
+                ),
+            ),
         )
         actual_depth_cm = feedback_counts_to_cm(
             abs(down_position - cycle_start_position)

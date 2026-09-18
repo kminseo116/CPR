@@ -28,6 +28,10 @@ STOPBITS = 1
 TIMEOUT_S = 0.30
 RETRIES = 2
 
+# 정상 통신에는 적용하지 않고, Modbus 요청이 실패해 재시도할 때만
+# 장치와 USB-RS485 변환기가 응답 가능한 상태로 돌아오도록 잠시 기다린다.
+RETRY_DELAY_S = 0.01
+
 # True일 때만 DWORD 요청 프레임과 에코 원문을 출력한다.
 # 일반 운전에서는 상태 로그의 가독성을 위해 False로 둔다.
 SHOW_MODBUS_DEBUG = False
@@ -80,7 +84,7 @@ TARGET_BPM = 107.0
 
 # 깊이와 BPM으로 계산한 이론 rpm에 곱하는 시험 보정값이다.
 CPR_SPEED_MARGIN = 2.3
-REPEAT_COUNT = 30
+REPEAT_COUNT = 1000
 
 # 매뉴얼 0x002D 내부 속도 설정의 허용 범위는 0~3000이다.
 MAX_INTERNAL_SPEED_SETTING = 3000
@@ -103,7 +107,7 @@ MAX_OUTPUT_SPEED_RPM = min(
 MAX_VERIFIED_OUTPUT_SPEED_RPM = 3000.0
 
 INITIAL_SPEED_RPM = 70.0
-SEARCH_SPEED_RPM = 30.0
+SEARCH_SPEED_RPM = 100.0
 
 # 압박 속도는 motor_main에서 깊이와 TARGET_BPM으로 자동 계산한다.
 # 이 값은 설정 표시와 이전 코드 호환용 상한 후보로만 유지한다.
@@ -151,8 +155,8 @@ CONTACT_CURRENT_CONFIRM_COUNT = 5
 # 5. 안전 설정
 # ============================================================================
 
-# 프로그램 시작과 각 CPR 실행 전에 물리적으로 복귀할 피드백 위치다.
-START_FEEDBACK_POSITION = 100
+# 프로그램 시작과 각 CPR 실행 전에 물리적으로 복귀할 피드백 위치다.   초기 위치
+START_FEEDBACK_POSITION = -67
 
 MIN_POSITION_CMD = -2_000_000
 MAX_POSITION_CMD = 2_000_000

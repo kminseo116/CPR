@@ -20,8 +20,13 @@ from motor_driver import MotorDriver, MotorError, MotorStatus
 from motor_ros_node import MotorRosBridge
 
 
-MOVE_CONFIRM_COUNT = 3
+MOVE_CONFIRM_COUNT = 5
 MIN_FEEDBACK_MOVEMENT = 16
+
+# 고속 CPR 명령 후 이 시간 안에 최소 이동량이 확인되지 않으면
+# 명령이 실제 운전으로 이어지지 않은 것으로 판단한다.
+CPR_COMMAND_START_TIMEOUT_S = 1.5
+CPR_COMMAND_START_MIN_COUNTS = 1000
 
 MOVE_STATE_LABELS = {
     "PRE_COMPRESSION_OFFSET": "0.5 cm 사전 이동",
@@ -715,6 +720,24 @@ def move_incremental_cpr_fast(
         ):
             movement_detected = True
 
+        if (
+            elapsed_s
+            >= CPR_COMMAND_START_TIMEOUT_S
+            and abs_delta
+            < CPR_COMMAND_START_MIN_COUNTS
+        ):
+            driver.stop()
+
+            raise MotorError(
+                f"{state_name} 이동 명령 미실행: "
+                f"elapsed={elapsed_s:.3f}s, "
+                f"expected="
+                f"{expected_feedback_delta}, "
+                f"actual={feedback_delta}, "
+                f"start_min="
+                f"{CPR_COMMAND_START_MIN_COUNTS}"
+            )
+
         # ====================================================
         # CPR 고속 왕복 반대 방향 판정
         #
@@ -889,7 +912,7 @@ def move_precompression_offset(
 ) -> int:
     """로드셀/접촉 판정 없이 압박 방향으로 0.5 cm 이동한다."""
 
-    precompression_offset_cm = 0.5
+    precompression_offset_cm = 8.0
     distance_mm = precompression_offset_cm * 10.0
     direction = cfg.MOTOR_DIRECTION_SIGN
 
