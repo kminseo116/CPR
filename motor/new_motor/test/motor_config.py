@@ -131,13 +131,13 @@ DECEL_FACTOR = 40
 # ============================================================================
 
 # 로드셀 연결 후 자동 접촉 판정에 사용할 값. 현재 수동 시험에서는 미사용.
-CONTACT_FORCE_N = 4.5
+CONTACT_FORCE_N = 20
 
-# 접촉 탐색은 아래 최대 거리까지 한 번의 증분 명령으로 연속 이동한다.
-# 첫 통합 시험에서는 Enter 입력 누락 시 장거리 이동하지 않도록 제한한다.
-CONTACT_SEARCH_MAX_MM = 20.0
+# 기존 8 cm 고정 사전 이동 범위 안에서 로드셀 접촉을 탐색한다.
+# 이 거리 안에서 CONTACT_FORCE_N에 도달하지 못하면 압박을 시작하지 않는다.
+CONTACT_SEARCH_MAX_MM = 80.0
 
-# 실제 시험에서 0.5 mm 이동에 약 3초가 걸렸으므로 5 mm 탐색에 여유를 둔다.
+# 저속 80 mm 탐색에도 충분하도록 둔 제한시간이다.
 CONTACT_SEARCH_TIMEOUT_S = 150.0
 
 # 로드셀 연결 후 자동 접촉 판정에 사용할 값. 현재 수동 시험에서는 미사용.
@@ -156,7 +156,7 @@ CONTACT_CURRENT_CONFIRM_COUNT = 5
 # ============================================================================
 
 # 프로그램 시작과 각 CPR 실행 전에 물리적으로 복귀할 피드백 위치다.   초기 위치
-START_FEEDBACK_POSITION = -67
+START_FEEDBACK_POSITION = 1000
 
 MIN_POSITION_CMD = -2_000_000
 MAX_POSITION_CMD = 2_000_000
@@ -284,7 +284,7 @@ MOVE_TIMEOUT_MARGIN_S = 2.0
 # 20000 이상이 3회 연속일 때만 정지시켜
 # 단발 피크와 지속 과전류를 구분하며,
 # 하중 로그를 보고 조정한다.
-MAX_CURRENT_RAW = 20_000
+MAX_CURRENT_RAW = 25_000
 CURRENT_TRIP_COUNT_LIMIT = 3
 
 

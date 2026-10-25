@@ -14,6 +14,8 @@ from __future__ import annotations
 import struct
 import time
 from dataclasses import dataclass
+from collections import deque
+from datetime import datetime
 from typing import Callable, TypeVar
 
 import minimalmodbus
@@ -60,6 +62,13 @@ class MotorDriver:
     ) -> None:
         self.instrument = minimalmodbus.Instrument(port, slave_id)
         self._configure_serial()
+        # 메모리 이력: 고장 시 추가 통신 없이 마지막 정상 상태를 볼 수 있다.
+        self.events = deque(maxlen=48)
+        self.last_position = None
+        self.last_cycle_status = None
+        self.last_status = None
+        self.last_communication_error = None
+        self.record_event("드라이버 연결 객체 생성", f"port={port}, slave={slave_id}")
 
     # ======================================================================
     # 1. 통신 초기화 및 재시도
@@ -80,19 +89,56 @@ class MotorDriver:
         # USB-RS485 변환기가 송신 프레임을 그대로 돌려주는 경우 제거
         self.instrument.handle_local_echo = False
 
-    def _retry(self, operation: Callable[[], T], description: str) -> T:
-        last_error: Exception | None = None
+    @staticmethod
+    def register_name(address: int) -> str:
+        names = {
+            cfg.REG_MOTOR_START: "모터 기동/정지 명령",
+            cfg.REG_INTERNAL_ENABLE: "서보 활성화",
+            cfg.REG_INTERNAL_SPEED: "명령 속도",
+            cfg.REG_INCREMENT_POSITION: "증분 위치 명령",
+            cfg.REG_CURRENT_POSITION: "현재 위치 피드백",
+            cfg.REG_ALARM_STATUS: "모터 보호 알람",
+            cfg.REG_RUN_STATUS: "운전 상태",
+            cfg.REG_CURRENT_CURRENT: "전류 원본값",
+            cfg.REG_CURRENT_VOLTAGE: "전압 원본값",
+            cfg.REG_POSITION_ERROR: "위치 편차",
+            cfg.REG_CURRENT_SPEED: "실제 속도 레지스터",
+        }
+        return names.get(address, "기타 레지스터")
 
-        for attempt in range(cfg.RETRIES + 1):
+    def record_event(self, action: str, detail: str = "") -> None:
+        stamp = datetime.now().astimezone().isoformat(timespec="milliseconds")
+        self.events.append(f"{stamp} | {action} | {detail}")
+
+    def _retry(self, operation: Callable[[], T], description: str) -> T:
+        """실패한 Modbus 요청의 종류·횟수·경과시간을 남긴다."""
+        started = time.monotonic()
+        last_error: Exception | None = None
+        for attempt in range(1, cfg.RETRIES + 2):
             try:
-                return operation()
+                result = operation()
+                if attempt > 1:
+                    self.record_event("통신 재시도 복구", f"{description}, {attempt}번째 시도")
+                    print(f"[COMM RECOVERED] {description} | attempt={attempt}/{cfg.RETRIES + 1} | "
+                          f"elapsed={time.monotonic()-started:.3f}s", flush=True)
+                return result
             except Exception as exc:
                 last_error = exc
+                text = str(exc).lower()
+                category = ("NO_RESPONSE/TIMEOUT" if any(x in text for x in
+                            ("no answer", "no communication", "timed out", "timeout"))
+                            else "MODBUS_OR_SERIAL_ERROR")
+                print(f"[COMM FAIL] {description} | attempt={attempt}/{cfg.RETRIES + 1} | "
+                      f"category={category} | exception={type(exc).__name__} | "
+                      f"detail={exc} | elapsed={time.monotonic()-started:.3f}s", flush=True)
+                self.last_communication_error = f"{description}: {type(exc).__name__}: {exc}"
+                self.record_event("통신 오류", f"{description}, {attempt}/{cfg.RETRIES + 1}, {type(exc).__name__}: {exc}")
                 self.clear_buffers()
-                if attempt < cfg.RETRIES:
+                if attempt <= cfg.RETRIES:
                     time.sleep(cfg.RETRY_DELAY_S)
-
-        raise MotorError(f"{description} 실패: {last_error}")
+        raise MotorError(f"{description} 실패 (총 {cfg.RETRIES + 1}회, "
+                         f"{time.monotonic()-started:.3f}s, "
+                         f"원인={type(last_error).__name__}: {last_error})") from last_error
 
     def clear_buffers(self) -> None:
         try:
@@ -116,8 +162,10 @@ class MotorDriver:
                 value,
                 functioncode=6,
             ),
-            f"WORD 쓰기 0x{address:04X}",
+            f"{self.register_name(address)} 쓰기(0x{address:04X}, value={value})",
         )
+        if address in (cfg.REG_MOTOR_START, cfg.REG_INTERNAL_ENABLE, cfg.REG_INTERNAL_SPEED):
+            self.record_event("명령 응답 수신", f"{self.register_name(address)}, value={value} (실제 동작 확인 아님)")
 
     def read_u16(self, address: int) -> int:
         return int(
@@ -127,7 +175,7 @@ class MotorDriver:
                     0,
                     functioncode=3,
                 ),
-                f"WORD 읽기 0x{address:04X}",
+                f"{self.register_name(address)} 읽기(0x{address:04X})",
             )
         )
 
@@ -217,12 +265,22 @@ class MotorDriver:
                 f"value={value}, words={words}"
             )
 
-        serial_port.reset_input_buffer()
-        serial_port.reset_output_buffer()
-        serial_port.write(request)
-        serial_port.flush()
-
-        echoed = serial_port.read(len(request))
+        stage = "buffer reset"
+        self.record_event("위치 명령 전송 시작", f"{self.register_name(address)}, value={value}")
+        try:
+            serial_port.reset_input_buffer()
+            serial_port.reset_output_buffer()
+            stage = "write/flush"
+            serial_port.write(request)
+            serial_port.flush()
+            stage = "read echo"
+            echoed = serial_port.read(len(request))
+        except Exception as exc:
+            self.last_communication_error = f"{self.register_name(address)} {stage}: {type(exc).__name__}: {exc}"
+            self.record_event("위치 명령 통신 실패", self.last_communication_error)
+            print(f"[COMM DWORD FAIL] address=0x{address:04X} | stage={stage} | "
+                  f"exception={type(exc).__name__} | detail={exc}", flush=True)
+            raise MotorError(f"DWORD 통신 실패 address=0x{address:04X} stage={stage}: {exc}") from exc
         if cfg.SHOW_MODBUS_DEBUG:
             print(
                 "[DWORD ECHO] "
@@ -230,12 +288,18 @@ class MotorDriver:
             )
 
         if echoed != request:
+            self.last_communication_error = (f"{self.register_name(address)} 에코 불일치 "
+                                             f"received={len(echoed)}/{len(request)} bytes")
+            self.record_event("위치 명령 에코 불일치", self.last_communication_error)
             self.clear_buffers()
             raise MotorError(
                 f"DWORD 요청 에코 불일치: address=0x{address:04X}, "
-                f"expected={request.hex(' ')}, actual={echoed.hex(' ')}"
+                f"expected={request.hex(' ')}, actual={echoed.hex(' ')}, "
+                f"received={len(echoed)}/{len(request)} bytes "
+                f"({'NO_ECHO_OR_TIMEOUT' if not echoed else 'PARTIAL_OR_DIFFERENT_ECHO'})"
             )
 
+        self.record_event("위치 명령 에코 일치", f"{self.register_name(address)}, value={value} (실행 확인 아님)")
         if cfg.SHOW_MODBUS_DEBUG:
             print(
                 f"[DWORD WRITE ACCEPTED] address=0x{address:04X}, "
@@ -249,7 +313,7 @@ class MotorDriver:
                 2,
                 functioncode=3,
             ),
-            f"DWORD 읽기 0x{address:04X}",
+            f"{self.register_name(address)} 읽기(0x{address:04X})",
         )
         return self._words_to_i32(list(words))
 
@@ -418,10 +482,12 @@ class MotorDriver:
     # ======================================================================
 
     def read_position(self) -> int:
-        return self.read_i32(cfg.REG_CURRENT_POSITION)
+        position = self.read_i32(cfg.REG_CURRENT_POSITION)
+        self.last_position = (time.monotonic(), position)
+        return position
 
     def read_status(self) -> MotorStatus:
-        return MotorStatus(
+        status = MotorStatus(
             position=self.read_position(),
             speed_rpm=self.read_i16(cfg.REG_CURRENT_SPEED),
             current_raw=self.read_u16(cfg.REG_CURRENT_CURRENT),
@@ -429,6 +495,8 @@ class MotorDriver:
             alarm=self.read_u16(cfg.REG_ALARM_STATUS),
             run_status=self.read_u16(cfg.REG_RUN_STATUS),
         )
+        self.last_status = (time.monotonic(), status)
+        return status
 
     def read_cycle_status(self) -> MotorCycleStatus:
         """사이클 사이에 필요한 상태만 세 번의 통신으로 읽는다.
@@ -453,12 +521,14 @@ class MotorDriver:
 
         current_raw = self.read_u16(cfg.REG_CURRENT_CURRENT)
         position = self.read_position()
-        return MotorCycleStatus(
+        status = MotorCycleStatus(
             position=position,
             current_raw=current_raw,
             alarm=int(alarm_and_run[0]),
             run_status=int(alarm_and_run[1]),
         )
+        self.last_cycle_status = (time.monotonic(), status)
+        return status
 
     # ======================================================================
     # 6. 안전 검사 및 상태 해석
