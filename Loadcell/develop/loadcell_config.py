@@ -12,10 +12,26 @@
 #     0: 0.0018
 # }
 
+# # 로드셀 3개용
+# # ── 채널 ──────────────────────────────────────────────────────
+# ACTIVE_CHANNELS: list[int]     = [1, 2, 3]   # 3채널: [0, 1, 2]
+# CHANNEL_LABELS:  dict[int, str] = {3: "0", 2: "1", 1: "2"}
+
+# # ── 로드셀 스펙 ───────────────────────────────────────────────
+# FULL_SCALE_KG = 100.0
+
+# # 채널별 Full Scale Output [V/V]
+# # CH0 = 1.844 mV/V, CH1 = 1.710 mV/V, CH2 = 1.785 mV/V
+# CHANNEL_FULL_SCALE_RATIO: dict[int, float] = {
+#     3: 0.001844,
+#     2: 0.001710,
+#     1: 0.001785,
+# }
+
 # 로드셀 3개용
 # ── 채널 ──────────────────────────────────────────────────────
-ACTIVE_CHANNELS: list[int]     = [1, 2, 3]   # 3채널: [0, 1, 2]
-CHANNEL_LABELS:  dict[int, str] = {3: "0", 2: "1", 1: "2"}
+ACTIVE_CHANNELS: list[int]     = [0, 1, 2]
+CHANNEL_LABELS:  dict[int, str] = {0: "0", 1: "1", 2: "2"}
 
 # ── 로드셀 스펙 ───────────────────────────────────────────────
 FULL_SCALE_KG = 100.0
@@ -23,13 +39,13 @@ FULL_SCALE_KG = 100.0
 # 채널별 Full Scale Output [V/V]
 # CH0 = 1.844 mV/V, CH1 = 1.710 mV/V, CH2 = 1.785 mV/V
 CHANNEL_FULL_SCALE_RATIO: dict[int, float] = {
-    3: 0.001844,
-    2: 0.001710,
-    1: 0.001785,
+    0: 0.001844,
+    1: 0.001710,
+    2: 0.001785,
 }
 
 # 기본값: 예외 상황 또는 구버전 코드 호환용
-FULL_SCALE_RATIO = CHANNEL_FULL_SCALE_RATIO[0]
+FULL_SCALE_RATIO = CHANNEL_FULL_SCALE_RATIO[ACTIVE_CHANNELS[0]]
 
 GRAVITY = 9.80665
 

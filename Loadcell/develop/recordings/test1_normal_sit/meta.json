@@ -1,0 +1,73 @@
+{
+  "config": {
+    "ACTIVE_CHANNELS": [
+      0,
+      1,
+      2
+    ],
+    "CHANNEL_LABELS": {
+      "0": "0",
+      "1": "1",
+      "2": "2"
+    },
+    "FULL_SCALE_KG": 100.0,
+    "CHANNEL_FULL_SCALE_RATIO": {
+      "0": 0.001844,
+      "1": 0.00171,
+      "2": 0.001785
+    },
+    "FULL_SCALE_RATIO": 0.001844,
+    "GRAVITY": 9.80665,
+    "CHANNEL_RATIO_PER_KG": {
+      "0": 1.844e-05,
+      "1": 1.71e-05,
+      "2": 1.785e-05
+    },
+    "RATIO_PER_KG": 1.844e-05,
+    "RATED_FORCE_N": 980.665,
+    "DATA_INTERVAL_MS": 10,
+    "MOVING_AVG_WINDOW": 5,
+    "ZERO_CAL_DURATION_S": 2.0,
+    "ZERO_CAL_SAMPLE_HZ": 100,
+    "ZERO_CAL_MIN_SAMPLES": 15,
+    "ZERO_DELAY_AFTER_RESET_S": 3.0,
+    "ZERO_SAFE_TOTAL_N": 10.0,
+    "TILT_MIN_FORCE_N": 200.0,
+    "SHARE_WARN_THRESH": 0.8,
+    "IMBALANCE_WARN_N": 300.0,
+    "OL_WARN_N": 800.0,
+    "OL_TRIP_N": 1000.0,
+    "OL_STOP_N": 1100.0,
+    "OL_CONFIRM": 5,
+    "COMPRESS_START_N": 120.0,
+    "COMPRESS_END_N": 90.0,
+    "PRINT_PERIOD_S": 0.1,
+    "PUBLISH_PERIOD_S": 0.01
+  },
+  "channels": {
+    "0": {
+      "label": "0",
+      "offset": 1.0983454015151508e-05
+    },
+    "1": {
+      "label": "1",
+      "offset": 7.499531444444446e-06
+    },
+    "2": {
+      "label": "2",
+      "offset": 8.839032010101009e-06
+    }
+  },
+  "csv_channel_map": {
+    "ch1": 0,
+    "ch2": 1,
+    "ch3": 2
+  },
+  "force_source": "existing loadcell_main.py calculation, unchanged",
+  "raw_channel_events_available": true,
+  "motor_control_changed": false,
+  "note": "receive_time_ns is PC callback arrival time, not sensor capture time",
+  "session_id": "20261026T101418_909603Z",
+  "start_monotonic_ns": 8883944520329,
+  "start_wall_time_utc": "2026-10-26T10:14:18.911133+00:00"
+}
